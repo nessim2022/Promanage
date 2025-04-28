@@ -1,0 +1,137 @@
+.project-members-container {
+  padding: 1rem;
+
+  .members-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h2 {
+      margin: 0;
+      color: var(--text-color);
+      font-weight: 600;
+    }
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    
+    .loading-text {
+      margin-top: 1rem;
+      color: var(--text-color-secondary);
+    }
+  }
+
+  .error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+  }
+
+  .members-table {
+    .role-badge {
+      border-radius: 2rem;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: inline-block;
+      
+      &.role-admin {
+        background-color: rgba(var(--primary-color-rgb), 0.15);
+        color: var(--primary-color);
+      }
+      
+      &.role-manager {
+        background-color: rgba(var(--primary-800-rgb), 0.15);
+        color: var(--primary-800);
+      }
+      
+      &.role-member {
+        background-color: rgba(var(--text-color-secondary-rgb), 0.15);
+        color: var(--text-color-secondary);
+      }
+      
+      &.role-viewer {
+        background-color: rgba(var(--blue-600-rgb), 0.15);
+        color: var(--blue-600);
+      }
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+  }
+
+  .no-members {
+    .empty-card {
+      background-color: var(--surface-card);
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .empty-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      text-align: center;
+
+      i {
+        font-size: 3rem;
+        color: var(--text-color-secondary);
+        margin-bottom: 1rem;
+      }
+
+      h3 {
+        margin: 0 0 0.5rem 0;
+        color: var(--text-color);
+      }
+
+      p {
+        margin: 0 0 1.5rem 0;
+        color: var(--text-color-secondary);
+      }
+    }
+  }
+
+  .add-member-form, .edit-role-form {
+    padding: 1rem 0;
+
+    .user-item {
+      display: flex;
+      flex-direction: column;
+
+      .user-name {
+        font-weight: 500;
+      }
+
+      .user-email {
+        color: var(--text-color-secondary);
+        font-size: 0.875rem;
+      }
+    }
+
+    .user-info {
+      padding: 0.5rem;
+      background-color: var(--surface-hover);
+      border-radius: 4px;
+
+      .user-name {
+        font-weight: 500;
+      }
+
+      .user-email {
+        color: var(--text-color-secondary);
+        font-size: 0.875rem;
+      }
+    }
+  }
+} 

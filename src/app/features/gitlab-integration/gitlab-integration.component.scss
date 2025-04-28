@@ -1,0 +1,286 @@
+/* src/app/features/gitlab-integration/gitlab-integration.component.scss */
+.p-card {
+    margin: 1rem 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    .p-table {
+      margin-top: 1rem;
+    }
+  }
+
+.gitlab-integration-container {
+  margin-bottom: 30px;
+}
+
+/* GitLab URL Button */
+.gitlab-url-button-container {
+  margin: 1.5rem 0;
+  text-align: center;
+  
+  .gitlab-url-button {
+    text-decoration: none;
+    
+    button {
+      padding: 1rem 2rem;
+      font-weight: bold;
+      
+      &:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+      }
+    }
+  }
+}
+
+.loading-container {
+  margin: 30px 0;
+  
+  .loading-text {
+    margin-top: 10px;
+    text-align: center;
+    color: #666;
+  }
+}
+
+.error-container {
+  margin: 30px 0;
+  
+  .error-message {
+    display: flex;
+    align-items: center;
+    color: #e74c3c;
+    margin-bottom: 20px;
+    
+    i {
+      margin-right: 10px;
+      font-size: 1.5rem;
+    }
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+/* No GitLab Project Section */
+.no-project-container {
+  margin: 30px 0;
+  
+  .no-project-card {
+    border-left: 4px solid #f39c12;
+    
+    .no-project-message {
+      text-align: center;
+      padding: 1.5rem;
+      
+      i {
+        font-size: 3rem;
+        color: #f39c12;
+        margin-bottom: 1rem;
+        display: block;
+      }
+      
+      h3 {
+        color: #333;
+        margin-bottom: 0.75rem;
+      }
+      
+      p {
+        color: #666;
+        margin-bottom: 1.25rem;
+      }
+      
+      .gitlab-url-display {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        padding: 0.75rem;
+        margin: 0.75rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        
+        span {
+          font-family: monospace;
+          color: #333;
+          word-break: break-all;
+        }
+        
+        .url-link {
+          margin-left: 10px;
+          color: #3498db;
+          
+          &:hover {
+            color: #2980b9;
+          }
+        }
+      }
+      
+      .mt-2 {
+        margin-top: 0.5rem;
+      }
+      
+      .mt-4 {
+        margin-top: 1rem;
+      }
+      
+      .action-buttons {
+        margin-top: 1rem;
+      }
+    }
+  }
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+.project-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  
+  .info-item {
+    label {
+      display: block;
+      font-weight: 600;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .value {
+      font-size: 1.1rem;
+      
+      &.gitlab-url-container {
+        word-break: break-all;
+      }
+      
+      .gitlab-link {
+        color: #3498db;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        
+        i {
+          margin-left: 5px;
+          font-size: 0.9rem;
+        }
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+.stats-section {
+  margin: 20px 0;
+  
+  .row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+  
+  .chart-container {
+    flex: 1;
+    min-width: 300px;
+    
+    .chart-wrapper {
+      height: 300px;
+    }
+  }
+  
+  .top-contributors {
+    flex: 1;
+    min-width: 300px;
+    
+    .contributor-list {
+      .contributor-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+        
+        &:last-child {
+          border-bottom: none;
+        }
+        
+        .contributor-info {
+          .contributor-name {
+            font-weight: 600;
+          }
+          
+          .contributor-email {
+            font-size: 0.9rem;
+            color: #666;
+          }
+        }
+        
+        .contributor-stats {
+          text-align: right;
+          
+          .commits {
+            font-weight: 600;
+          }
+          
+          .percentage {
+            color: #666;
+            font-size: 0.9rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+.contribution-progress {
+  display: flex;
+  align-items: center;
+  max-width: 200px;
+  
+  .percentage-text {
+    margin-left: 10px;
+    min-width: 40px;
+    text-align: right;
+  }
+}
+
+.sync-progress {
+  margin-left: 8px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+}
+
+.form-note {
+  color: #666;
+  font-size: 0.9rem;
+}

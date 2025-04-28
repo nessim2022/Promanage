@@ -1,0 +1,138 @@
+/* Basic PrimeNG Core Styles */
+.p-component {
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: normal;
+}
+
+.p-component-overlay {
+    background-color: rgba(0, 0, 0, 0.4);
+    transition-duration: 0.2s;
+}
+
+.p-disabled, .p-component:disabled {
+    opacity: 0.6;
+}
+
+/* FlexBox */
+.p-d-flex {
+    display: flex !important;
+}
+
+.p-flex-column {
+    flex-direction: column !important;
+}
+
+.p-flex-row {
+    flex-direction: row !important;
+}
+
+.p-justify-start {
+    justify-content: flex-start !important;
+}
+
+.p-justify-end {
+    justify-content: flex-end !important;
+}
+
+.p-justify-center {
+    justify-content: center !important;
+}
+
+.p-justify-between {
+    justify-content: space-between !important;
+}
+
+.p-justify-around {
+    justify-content: space-around !important;
+}
+
+.p-justify-evenly {
+    justify-content: space-evenly !important;
+}
+
+.p-align-start {
+    align-items: flex-start !important;
+}
+
+.p-align-end {
+    align-items: flex-end !important;
+}
+
+.p-align-center {
+    align-items: center !important;
+}
+
+.p-align-baseline {
+    align-items: baseline !important;
+}
+
+.p-align-stretch {
+    align-items: stretch !important;
+}
+
+/* Text */
+.p-text-left {
+    text-align: left !important;
+}
+
+.p-text-right {
+    text-align: right !important;
+}
+
+.p-text-center {
+    text-align: center !important;
+}
+
+.p-text-justify {
+    text-align: justify !important;
+}
+
+/* Spacing */
+.p-m-0 {
+    margin: 0 !important;
+}
+
+.p-m-1 {
+    margin: 0.25rem !important;
+}
+
+.p-m-2 {
+    margin: 0.5rem !important;
+}
+
+.p-m-3 {
+    margin: 1rem !important;
+}
+
+.p-m-4 {
+    margin: 1.5rem !important;
+}
+
+.p-m-5 {
+    margin: 2rem !important;
+}
+
+.p-p-0 {
+    padding: 0 !important;
+}
+
+.p-p-1 {
+    padding: 0.25rem !important;
+}
+
+.p-p-2 {
+    padding: 0.5rem !important;
+}
+
+.p-p-3 {
+    padding: 1rem !important;
+}
+
+.p-p-4 {
+    padding: 1.5rem !important;
+}
+
+.p-p-5 {
+    padding: 2rem !important;
+} 

@@ -1,0 +1,37 @@
+<div class="sidebar" [class.collapsed]="collapsed">
+  <div class="sidebar-header">
+    <div class="logo-container">
+      <img src="assets/logo.png" alt="SIGA Logo" class="logo-img" />
+      <h3 class="app-name" *ngIf="!collapsed">SIGA</h3>
+    </div>
+    <button class="toggle-btn" (click)="toggle()">
+      <i class="pi" [ngClass]="collapsed ? 'pi-angle-right' : 'pi-angle-left'"></i>
+    </button>
+  </div>
+  
+  <div class="menu">
+    <ng-container *ngFor="let item of menuItems">
+      <a 
+        *ngIf="!item.requiresAuth || isLoggedIn()"
+        [routerLink]="item.route" 
+        [class.active]="isRouteActive(item.route)"
+        class="menu-item"
+        [pTooltip]="collapsed ? item.label : ''"
+        tooltipPosition="right"
+      >
+        <span class="icon-container">
+          <i [class]="item.icon"></i>
+          <span class="p-badge" *ngIf="item.badge">{{ item.badge }}</span>
+        </span>
+        <span class="label" *ngIf="!collapsed">{{ item.label }}</span>
+      </a>
+    </ng-container>
+  </div>
+  
+  <div class="sidebar-footer" *ngIf="!collapsed">
+    <div class="company-info">
+      <p>SIGA Technologies</p>
+      <p class="version">v1.0.0</p>
+    </div>
+  </div>
+</div>

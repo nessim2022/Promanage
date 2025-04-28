@@ -1,0 +1,121 @@
+<div class="login-page">
+    <div class="login-container">
+      
+      <!-- Section image -->
+      <div class="image-section">
+        <div class="image-content">
+          <img src="assets/images/NV_LOGO_SIGA_2_69.png" alt="Company Logo" class="company-logo">
+          <h1>Bienvenue sur SIGA</h1>
+          <p>Votre plateforme de gestion de projets et de documents</p>
+        </div>
+      </div>
+
+      <!-- Formulaire de connexion -->
+      <div class="form-section">
+        <p-card class="login-card">
+  
+          <ng-template pTemplate="header">
+            <div class="card-header">
+              <img src="assets/images/NV_LOGO_SIGA_2_69.png" alt="Company Logo" class="company-logo">
+              <h2>Connexion</h2>
+              <p>Connectez-vous pour accéder à votre compte</p>
+            </div>
+          </ng-template>
+  
+          <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
+            <div class="form-group">
+  
+              <!-- Email Input with Icon -->
+              <div class="p-field">
+                <label for="email">Email</label>
+                <div class="p-input-icon-left w-full">
+                  <i class="pi pi-envelope"></i>
+                  <input 
+                    pInputText 
+                    id="email" 
+                    formControlName="email" 
+                    class="w-full"
+                    [ngClass]="{'ng-invalid ng-dirty': loginForm.get('email')?.invalid && loginForm.get('email')?.touched}"
+                  />
+                </div>
+                <small *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched" class="p-error">
+                  Ce champ est requis
+                </small>
+                <small *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched" class="p-error">
+                  Format d'email invalide
+                </small>
+              </div>
+  
+              <!-- Password Input with Icon -->
+              <div class="p-field mt-4">
+                <label for="password">Mot de passe</label>
+                <div class="p-input-icon-left w-full">
+                  <i class="pi pi-lock"></i>
+                  <p-password 
+                    id="password" 
+                    formControlName="password" 
+                    [ngClass]="{'ng-invalid ng-dirty': loginForm.get('password')?.invalid && loginForm.get('password')?.touched}"
+                    [toggleMask]="true"
+                    [feedback]="false"
+                    styleClass="w-full"
+                    inputStyleClass="w-full"
+                  ></p-password>
+                </div>
+                <small *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched" class="p-error">
+                  Ce champ est requis
+                </small>
+              </div>
+  
+              <!-- Form Options -->
+              <div class="flex justify-content-between align-items-center mt-4">
+                <div class="p-field-checkbox">
+                  <p-checkbox 
+                    inputId="rememberMe"
+                    formControlName="rememberMe" 
+                    [binary]="true"
+                  ></p-checkbox>
+                  <label for="rememberMe" class="ml-2">Se souvenir de moi</label>
+                </div>
+                <a href="/forgot-password" class="p-text-secondary">Mot de passe oublié ?</a>
+              </div>
+  
+              <!-- Display server error message if there is one -->
+              <div *ngIf="errorMessage" class="server-error-message p-error mt-3 text-center">
+                {{ errorMessage }}
+              </div>
+
+              <!-- Display status code if there is one -->
+              <div *ngIf="statusCode" class="status-code-message mt-3 text-center">
+                <span [ngClass]="statusCode >= 200 && statusCode < 300 ? 'status-success' : 'status-error'">
+                  Code d'état: {{ statusCode }}
+                </span>
+              </div>
+  
+              <!-- Submit Button -->
+              <div class="mt-4">
+                <p-button 
+                  label="Se connecter"
+                  type="submit" 
+                  styleClass="p-button-primary w-full"
+                  [loading]="loading"
+                  [disabled]="loginForm.invalid || loading"
+                ></p-button>
+              </div>
+  
+            </div>
+          </form>
+  
+          <ng-template pTemplate="footer">
+            <div class="card-footer">
+              <p>Vous n'avez pas de compte ? <a routerLink="/register" class="signup-link">S'inscrire</a></p>
+            </div>
+          </ng-template>
+  
+        </p-card>
+      </div>
+      
+    </div>
+  
+    <p-toast></p-toast>
+  </div>
+  

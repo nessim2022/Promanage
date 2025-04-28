@@ -1,0 +1,37 @@
+/* Aucun style spécifique n'est nécessaire pour le composant racine */
+
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 1rem;
+  transition: all 0.3s ease;
+  overflow-x: hidden;
+  
+  &.with-navbar {
+    padding-top: 76px; /* 64px navbar + 12px padding */
+  }
+  
+  &.with-sidebar {
+    margin-left: 250px;
+  }
+  
+  &.with-collapsed-sidebar {
+    margin-left: 70px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    &.with-sidebar {
+      margin-left: 70px;
+    }
+    
+    &.with-collapsed-sidebar {
+      margin-left: 0;
+    }
+  }
+}

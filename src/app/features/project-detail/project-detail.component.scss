@@ -1,0 +1,243 @@
+/* src/app/features/project-detail/project-detail.component.scss */
+.p-card {
+    margin: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      padding: 1rem;
+      .p-button {
+        align-self: flex-end;
+      }
+    }
+  }
+
+.project-detail-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  
+  .header-left {
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #333;
+    }
+    
+    .subtitle {
+      margin: 5px 0 0 0;
+      color: #666;
+      font-size: 1rem;
+    }
+  }
+}
+
+.loading-container {
+  margin: 30px 0;
+  
+  .loading-text {
+    margin-top: 10px;
+    text-align: center;
+    color: #666;
+  }
+}
+
+.error-container {
+  margin: 30px 0;
+  
+  .error-message {
+    display: flex;
+    align-items: center;
+    color: #e74c3c;
+    
+    i {
+      margin-right: 10px;
+      font-size: 1.5rem;
+    }
+  }
+  
+  .retry-button {
+    margin-top: 15px;
+    text-align: center;
+  }
+}
+
+.project-content {
+  .project-summary {
+    margin-bottom: 20px;
+    
+    .summary-content {
+      display: flex;
+      justify-content: space-between;
+      
+      .summary-left {
+        flex: 2;
+        
+        h2 {
+          margin-top: 0;
+          color: #2c3e50;
+        }
+        
+        .project-dates {
+          margin-top: 15px;
+          display: flex;
+          
+          .date-item {
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            
+            i {
+              margin-right: 8px;
+              color: #3498db;
+            }
+          }
+        }
+      }
+      
+      .summary-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-end;
+        
+        .progress-status {
+          margin-bottom: 15px;
+        }
+        
+        .progress-bar-container {
+          width: 100%;
+          
+          label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+          }
+        }
+      }
+    }
+  }
+  
+  .status-badge {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    
+    &.status-completed {
+      background-color: #27ae60;
+      color: white;
+    }
+    
+    &.status-in-progress {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    &.status-pending {
+      background-color: #e67e22;
+      color: white;
+    }
+    
+    &.status-error {
+      background-color: #e74c3c;
+      color: white;
+    }
+  }
+  
+  .progress-low {
+    .p-progressbar-value {
+      background-color: #e74c3c !important;
+    }
+  }
+  
+  .progress-medium {
+    .p-progressbar-value {
+      background-color: #f39c12 !important;
+    }
+  }
+  
+  .progress-high {
+    .p-progressbar-value {
+      background-color: #27ae60 !important;
+    }
+  }
+  
+  .tab-content {
+    padding: 20px 0;
+    
+    .form-group {
+      margin-bottom: 20px;
+      
+      label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+      }
+      
+      input, textarea {
+        width: 100%;
+      }
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 20px;
+      
+      .form-group {
+        flex: 1;
+      }
+    }
+    
+    .form-actions {
+      margin-top: 30px;
+      display: flex;
+      gap: 10px;
+    }
+  }
+}
+
+.gitlab-url-group {
+  margin-bottom: 1.5rem;
+
+  .p-inputgroup {
+    margin-bottom: 0.25rem;
+  }
+
+  .gitlab-url-preview {
+    display: flex;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 4px;
+    
+    i {
+      margin-right: 0.5rem;
+      color: #fc6d26; // Couleur GitLab
+    }
+  }
+}
+
+.gitlab-url-container {
+  margin-bottom: 1.5rem;
+  
+  .p-inputgroup {
+    display: flex;
+    align-items: center;
+    
+    .p-button {
+      margin-left: 8px;
+      min-width: 120px;
+    }
+  }
+}

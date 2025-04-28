@@ -1,0 +1,345 @@
+/* Remove default margins and padding */
+:host {
+  display: block;
+  height: 100%;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Status code styles */
+.status-code-message {
+  font-weight: bold;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  margin-top: 10px;
+  
+  .status-success {
+    color: #22c55e; /* Green color for success */
+  }
+  
+  .status-error {
+    color: #ef4444; /* Red color for errors */
+  }
+}
+
+/* Server error message */
+.server-error-message {
+  background-color: rgba(239, 68, 68, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  border-left: 4px solid #ef4444;
+  margin: 15px 0;
+}
+
+/* General page layout */
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #6d8098 0%, #101011 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.register-container {
+  display: flex;
+  max-width: 1200px;
+  width: 95%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #ffffff;
+  position: relative;
+  z-index: 2;
+  margin: 2rem 0;
+}
+
+/* Image section */
+.image-section {
+  flex: 1;
+  position: relative;
+  min-height: 600px;
+  background: linear-gradient(135deg, #e9ecf0 0%, #e3e5e6 100%);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Add subtle pattern overlay */
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.3;
+  }
+
+  .image-content {
+    position: relative;
+    color: #333;
+    text-align: center;
+    padding: 20px;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .company-logo {
+      width: 90%;
+      max-width: 300px;
+      height: auto;
+      margin-bottom: 2rem;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      color: #333;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 1.3rem;
+      color: #555;
+      max-width: 80%;
+      line-height: 1.5;
+    }
+  }
+}
+
+/* Form section */
+.form-section {
+  flex: 1;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  .register-card {
+    width: 100%;
+    max-width: 500px;
+    margin: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    
+    ::ng-deep .p-card-content {
+      padding: 1.5rem;
+    }
+
+    ::ng-deep .p-card-body {
+      padding: 0;
+    }
+
+    .card-header {
+      text-align: center;
+      padding: 1.5rem 1.5rem 0;
+
+      h2 {
+        font-size: 2rem;
+        color: #333;
+        margin: 0;
+        font-weight: 700;
+      }
+
+      .company-logo {
+        max-width: 80px;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        color: #6c757d;
+        margin-bottom: 0;
+      }
+    }
+
+    .register-form {
+      display: flex;
+      flex-direction: column;
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      label {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+      }
+
+      ::ng-deep .p-inputtext {
+        padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+        font-size: 1rem;
+      }
+
+      ::ng-deep .p-password-panel {
+        margin-top: 5px;
+      }
+
+      .p-field {
+        margin-bottom: 1.5rem;
+        position: relative;
+      }
+
+      ::ng-deep .p-input-icon-left {
+        i {
+          left: 0.8rem;
+          color: #6b7280;
+        }
+      }
+
+      .p-error {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: #ef4444;
+      }
+
+      .p-field-checkbox {
+        margin: 1.5rem 0;
+
+        label {
+          font-weight: 400;
+          font-size: 0.95rem;
+          color: #4b5563;
+          user-select: none;
+        }
+
+        a {
+          color: #3b82f6;
+          text-decoration: none;
+          font-weight: 600;
+          
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+      }
+
+      ::ng-deep .p-button {
+        padding: 0.8rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        
+        &:hover:not([disabled]) {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        &:focus {
+          box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(59, 130, 246, 0.5);
+        }
+      }
+    }
+
+    .card-footer {
+      text-align: center;
+      padding: 0 1.5rem 1.5rem;
+      font-size: 1rem;
+      color: #6b7280;
+      
+      .login-link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-weight: 600;
+        
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+  .register-container {
+    flex-direction: column;
+    max-width: 550px;
+  }
+  
+  .image-section {
+    min-height: 250px;
+    order: -1;
+    
+    .image-content {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      p {
+        font-size: 1.1rem;
+      }
+    }
+  }
+  
+  .form-section {
+    max-height: none;
+    overflow-y: visible;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-container {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  .register-page {
+    padding: 0;
+  }
+  
+  .form-section {
+    padding: 1rem;
+  }
+  
+  .image-section {
+    min-height: 180px;
+    
+    .image-content {
+      h1 {
+        font-size: 1.7rem;
+      }
+      
+      p {
+        font-size: 1rem;
+      }
+    }
+  }
+}
+
+.language-selector-container {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 10;
+}
+
+:host-context([dir="rtl"]) {
+  .language-selector-container {
+    right: auto;
+    left: 1rem;
+  }
+}

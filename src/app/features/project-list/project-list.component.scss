@@ -1,0 +1,82 @@
+/* src/app/features/project-list/project-list.component.scss */
+.project-list-header {
+  text-align: center;
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  h2 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    .pi {
+      margin-right: 0.5rem;
+      color: #007ad9;
+    }
+    .badge {
+      background: #007ad9;
+      color: #fff;
+      border-radius: 12px;
+      padding: 0.2em 0.7em;
+      font-size: 1rem;
+      margin-left: 1rem;
+    }
+  }
+  hr {
+    border: none;
+    border-top: 2px solid #007ad9;
+    width: 60px;
+    margin: 0.5rem auto 0 auto;
+  }
+}
+
+.p-card {
+  margin: 2rem auto;
+  max-width: 900px;
+  box-shadow: 0 4px 16px rgba(44, 62, 80, 0.13);
+  border-radius: 12px;
+  .p-table {
+    margin-top: 1rem;
+    .p-button {
+      margin-right: 0.5rem;
+    }
+    tr {
+      transition: background 0.2s;
+      &:hover {
+        background: #f4faff;
+      }
+    }
+    th, td {
+      text-align: center;
+    }
+    th {
+      background: #f6fafd;
+      color: #007ad9;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    td {
+      font-size: 1rem;
+      vertical-align: middle;
+    }
+    .text-center {
+      text-align: center;
+    }
+  }
+}
+
+.p-button {
+  font-size: 0.95rem;
+}
+
+h3 {
+  margin-top: 2.5rem;
+  color: #007ad9;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  .pi {
+    margin-right: 0.4rem;
+  }
+}

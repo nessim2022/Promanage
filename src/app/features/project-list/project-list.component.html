@@ -1,0 +1,40 @@
+<!-- src/app/features/project-list/project-list.component.html -->
+<div class="project-list-header">
+  <h2><i class="pi pi-briefcase"></i> Mes projets <span class="badge">{{ projects.length }}</span></h2>
+  <hr />
+</div>
+
+<p-card header="Liste des projets">
+  <p-table [value]="projects" [tableStyle]="{ 'min-width': '50rem' }" [rowHover]="true">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nom</th>
+        <th>Début</th>
+        <th>Fin</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-project>
+      <tr>
+        <td><b>{{ project.name }}</b></td>
+        <td>{{ project.startDate | date:'dd/MM/yyyy' }}</td>
+        <td>{{ project.endDate | date:'dd/MM/yyyy' }}</td>
+        <td>
+          <p-button icon="pi pi-folder-open" label="Voir docs" (click)="onSelectProject(project.projectId)" styleClass="p-button-rounded p-button-success p-button-sm" tooltip="Voir les documents du projet"></p-button>
+          <p-button icon="pi pi-info-circle" label="Détails" [routerLink]="['/projects', project.projectId]" styleClass="p-button-rounded p-button-info p-button-sm" tooltip="Voir les détails du projet"></p-button>
+          <p-button icon="pi pi-trash" label="Supprimer" (click)="deleteProject(project.projectId)" styleClass="p-button-rounded p-button-danger p-button-sm" tooltip="Supprimer le projet"></p-button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="4" class="text-center">Aucun projet trouvé.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>
+
+<div *ngIf="selectedProjectId">
+  <h3><i class="pi pi-folder-open"></i> Documents du projet sélectionné</h3>
+  <app-document-list [projectId]="selectedProjectId"></app-document-list>
+</div>
