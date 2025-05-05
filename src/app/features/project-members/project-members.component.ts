@@ -343,7 +343,14 @@ export class ProjectMembersComponent implements OnInit {
     this.loading = true;
     this.error = false;
     
-    this.userService.getProjectMembers(this.projectId)
+    // Assurez-vous que projectId est un nombre valide
+    const projectId = Number(this.projectId);
+    if (isNaN(projectId)) {
+      console.error('ID de projet invalide:', this.projectId);
+      this.error = true;
+      return;
+    }
+    this.userService.getProjectMembers(projectId)
       .pipe(
         finalize(() => {
           this.loading = false;
@@ -354,9 +361,14 @@ export class ProjectMembersComponent implements OnInit {
           this.members = data;
         },
         error: (err) => {
-          console.error('Failed to load project members:', err);
+          console.error('Erreur lors du chargement des membres du projet:', err);
           this.error = true;
-          this.errorMessage = 'Impossible de charger les membres du projet. Veuillez réessayer.';
+          
+          if (err.status === 404 && err.error?.message?.includes('No static resource')) {
+            this.errorMessage = 'Problème d\'accès à la liste des membres. L\'URL de l\'API a été mise à jour, veuillez actualiser la page.';
+          } else {
+            this.errorMessage = 'Impossible de charger les membres du projet. Veuillez réessayer.';
+          }
         }
       });
   }

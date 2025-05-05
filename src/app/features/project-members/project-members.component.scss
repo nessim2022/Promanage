@@ -12,6 +12,27 @@
       color: var(--text-color);
       font-weight: 600;
     }
+  }.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .w-full {
+    width: 100%;
+  }
+  
+  .mt-2 {
+    margin-top: 0.5rem;
   }
 
   .loading-container {

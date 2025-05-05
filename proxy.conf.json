@@ -2,11 +2,17 @@
   "/api": {
     "target": "http://localhost:8082",
     "secure": false,
-    "changeOrigin": true
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/api": ""
+    }
   },
   "/auth": {
     "target": "http://localhost:8082",
     "secure": false,
-    "changeOrigin": true
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/auth": ""
+    }
   }
 }

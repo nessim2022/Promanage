@@ -292,6 +292,13 @@ export class DocumentListComponent implements OnInit, OnDestroy {
             setTimeout(() => {
               this.router.navigate(['/login']);
             }, 2000);
+          } else if (error.status === 500 && error.error?.message?.includes('Unsupported field: HourOfDay')) {
+            this.errorMessage = 'Problème de format de date détecté. L\'administrateur a été informé.';
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur de format',
+              detail: 'Un problème de format de date a été détecté. Veuillez contacter l\'administrateur.'
+            });
           } else {
             this.errorMessage = 'Impossible de charger les documents. Veuillez réessayer.';
           }

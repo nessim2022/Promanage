@@ -1,0 +1,45 @@
+<div class="container">
+  <h2>Ajouter un membre à un projet GitLab</h2>
+
+  <p-toast></p-toast>
+
+  <div class="form-group">
+    <label for="projectUrl">URL du projet GitLab</label>
+    <p-inputText
+      id="projectUrl"
+      [(ngModel)]="projectUrl"
+      placeholder="https://gitlab.com/namespace/project"
+      styleClass="w-full"
+    ></p-inputText>
+    <p-button
+      label="Récupérer l'ID du projet"
+      styleClass="mt-2"
+      (onClick)="getProjectId()"
+    ></p-button>
+  </div>
+
+  <div *ngIf="projectId" class="form-group">
+    <p>ID du projet : {{ projectId }}</p>
+    <label for="userId">ID de l'utilisateur</label>
+    <p-inputText
+      id="userId"
+      [(ngModel)]="userId"
+      placeholder="123"
+      styleClass="w-full"
+    ></p-inputText>
+    <label for="accessLevel">Niveau d'accès</label>
+    <p-dropdown
+      id="accessLevel"
+      [(ngModel)]="accessLevel"
+      [options]="accessLevels"
+      optionLabel="label"
+      optionValue="value"
+      styleClass="w-full"
+    ></p-dropdown>
+    <p-button
+      label="Ajouter le membre"
+      styleClass="mt-2 p-button-success"
+      (onClick)="addMember()"
+    ></p-button>
+  </div>
+</div>

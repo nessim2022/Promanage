@@ -80,12 +80,52 @@ export class DocumentService {
       );
   }
 
-  getDocumentsByProject(projectId: number): Observable<AppDocument[]> {
+  getDocumentsByProject(projectId: number, isAdmin: boolean = false): Observable<AppDocument[]> {
     console.log(`Récupération des documents pour le projet ${projectId}`);
-    return this.http.get<any[]>(`${this.apiUrl}/documents/project/${projectId}`, {
+    const endpoint = isAdmin 
+      ? `${this.apiUrl}/documents/project/${projectId}/admin`
+      : `${this.apiUrl}/documents/project/${projectId}`;
+      
+    return this.http.get<any[]>(endpoint, {
       headers: this.getHeaders()
     }).pipe(
-      catchError(error => this.handleSessionExpired(error)),
+      catchError(error => {
+        // Gestion spécifique de l'erreur "Unsupported field: HourOfDay"
+        if (error.status === 500 && error.error?.message?.includes('Unsupported field: HourOfDay')) {
+          console.error('Erreur de format de date détectée:', error);
+          console.log('Détails de l\'erreur de format de date:', {
+            message: error.error?.message,
+            trace: error.error?.trace,
+            timestamp: error.error?.timestamp,
+            projectId: projectId
+          });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur de format',
+            detail: 'Un problème de format de date a été détecté. Veuillez contacter l\'administrateur.'
+          });
+          
+          // Retry with simplified date format
+          return this.http.get<any[]>(`${this.apiUrl}/documents/project/${projectId}/simple`, {
+            headers: this.getHeaders()
+          }).pipe(
+            map(docs => this.processDocuments(docs))
+          );
+        }
+        
+        // Gestion des erreurs 404
+        if (error.status === 404) {
+          console.error(`Endpoint non trouvé pour le projet ${projectId}:`, error);
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Endpoint non trouvé',
+            detail: 'Le endpoint demandé n\'existe pas. Veuillez vérifier l\'URL.'
+          });
+          return of([]);
+        }
+        
+        return this.handleSessionExpired(error);
+      }),
       map(docs => this.processDocuments(docs))
     );
   }

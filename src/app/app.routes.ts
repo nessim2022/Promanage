@@ -18,7 +18,8 @@ export const routes: Routes = [
   { path: 'projects', component: ProjectListComponent, canActivate: [authGuard] },
   { path: 'projects/:id', component: ProjectDetailComponent, canActivate: [authGuard] },
   { path: 'gitlab', component: GitlabIntegrationComponent, canActivate: [authGuard] },
-  { path: 'documents', component: DocumentListComponent, canActivate: [authGuard] },
+  { path: 'documents', component: DocumentListComponent },
+  { path: 'documents/:projectId', component: DocumentListComponent, canActivate: [authGuard] },
   { path: 'notifications', component: NotificationListComponent, canActivate: [authGuard] },
   {
     path: 'all-documents',

@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { MessageService } from 'primeng/api';
 
 // Interface pour les utilisateurs/membres
 export interface User {
@@ -35,7 +36,10 @@ export interface Role {
 export class UserService {
   private apiUrl = environment.apiUrl;
   
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private messageService: MessageService
+  ) {}
   
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('auth_token');
@@ -71,16 +75,44 @@ export class UserService {
   
   // Récupérer les membres d'un projet spécifique
   getProjectMembers(projectId: number): Observable<ProjectMember[]> {
-    // Make sure we're using the API path with project ID
-    console.log(`Fetching members for project ${projectId} from ${this.apiUrl}/projects/${projectId}/users`);
+    // Utiliser le bon chemin d'API avec l'ID du projet
+    const url = `${this.apiUrl}/projects/${projectId}/users`;
+    console.log(`Récupération des membres pour le projet ${projectId} depuis ${url}`);
     
-    return this.http.get<ProjectMember[]>(`${this.apiUrl}/projects/${projectId}/users`, { 
+    return this.http.get<ProjectMember[]>(url, { 
       headers: this.getHeaders() 
     })
       .pipe(
-        tap(members => console.log(`Fetched ${members.length} members for project ${projectId}`)),
+        tap(members => {
+          console.log(`Récupération de ${members.length} membres pour le projet ${projectId}`);
+          // Informer l'utilisateur que les données sont chargées correctement
+          // Nous n'affichons ce message que lors du premier chargement réussi après correction
+          if (members.length > 0) {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Succès',
+              detail: 'Les membres du projet ont été chargés avec succès.'
+            });
+          }
+        }),
         catchError(error => {
-          console.error(`Error fetching members for project ${projectId}:`, error);
+          console.error(`Erreur lors de la récupération des membres pour le projet ${projectId}:`, error);
+          
+          // Gestion spécifique des erreurs 404
+          if (error.status === 404) {
+            this.messageService.add({
+              severity: 'warn',
+              summary: 'Endpoint non trouvé',
+              detail: 'Le endpoint pour les membres du projet est introuvable. Veuillez vérifier l\'URL.'
+            });
+            return of([]);
+          }
+          
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de charger les membres du projet. Veuillez réessayer.'
+          });
           return of([]);
         })
       );
@@ -100,6 +132,17 @@ export class UserService {
     return this.http.post(`${this.apiUrl}/projects/${projectId}/users`, data, { 
       headers: this.getHeaders() 
     }).pipe(
+      catchError(error => {
+        console.error(`Erreur lors de l'ajout de l'utilisateur au projet:`, error);
+        if (error.status === 0) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur de connexion',
+            detail: 'Impossible de se connecter au serveur. Veuillez vérifier votre connexion.'
+          });
+        }
+        throw error;
+      }),
       tap(() => console.log(`Utilisateur ${userId} ajouté au projet ${projectId} avec le rôle ${role}`)),
       catchError(error => {
         console.error(`Erreur lors de l'ajout de l'utilisateur au projet:`, error);
@@ -115,6 +158,13 @@ export class UserService {
         tap(() => console.log(`Removed user ${userId} from project ${projectId}`)),
         catchError(error => {
           console.error(`Error removing user from project:`, error);
+          if (error.status === 0) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur de connexion',
+              detail: 'Impossible de se connecter au serveur. Veuillez vérifier votre connexion.'
+            });
+          }
           throw error;
         })
       );
