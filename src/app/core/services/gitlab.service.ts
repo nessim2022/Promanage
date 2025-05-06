@@ -81,12 +81,25 @@ export class GitlabService {
     );
   }
 
-  addMemberToGitLabProject(projectId: number, email: string): Observable<boolean> {
-    return this.http.post<boolean>(`/gitlab/add-user`, {
+  // addMemberToGitLabProject(projectId: number, email: string): Observable<boolean> {
+  //   return this.http.post<boolean>(`/gitlab/add-user`, {
+  //     projectId,
+  //     email
+  //   }, { headers: this.getHeaders() }).pipe(
+  //     tap(() => console.log(`Added member ${email} to GitLab project ${projectId}`)),
+  //     catchError(error => {
+  //       console.error(`Error adding member to GitLab project:`, error);
+  //       throw error;
+  //     })
+  //   );
+  // }
+  addMemberToGitLabProject(projectId: number, userId: number, accessLevel: number): Observable<boolean> {
+    return this.http.post<boolean>(`${this.apiUrl}/add-member`, {
       projectId,
-      email
+      userId,
+      accessLevel
     }, { headers: this.getHeaders() }).pipe(
-      tap(() => console.log(`Added member ${email} to GitLab project ${projectId}`)),
+      tap(() => console.log(`Added member ${userId} to GitLab project ${projectId}`)),
       catchError(error => {
         console.error(`Error adding member to GitLab project:`, error);
         throw error;

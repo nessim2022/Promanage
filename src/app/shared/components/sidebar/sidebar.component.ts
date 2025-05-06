@@ -24,7 +24,7 @@ interface MenuItem {
 export class SidebarComponent implements OnInit {
   @Input() collapsed: boolean = false;
   @Output() toggleSidebar = new EventEmitter<void>();
-  
+  user:any;
   currentRoute: string = '';
   menuItems: MenuItem[] = [
     { label: 'Tableau de bord', icon: 'pi pi-home', route: '/dashboard', requiresAuth: true },
@@ -39,7 +39,9 @@ export class SidebarComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentRoute = this.router.url;
-    
+    this.user=localStorage.getItem('auth_user');
+    this.user=JSON.parse(this.user);
+    this.user=this.user.email;
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {

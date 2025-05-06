@@ -1,8 +1,7 @@
 <div class="sidebar" [class.collapsed]="collapsed">
   <div class="sidebar-header">
     <div class="logo-container">
-      <img src="assets/logo.png" alt="SIGA Logo" class="logo-img" />
-      <h3 class="app-name" *ngIf="!collapsed">SIGA</h3>
+      <h5 class="app-name" *ngIf="!collapsed">{{user}}</h5>
     </div>
     <button class="toggle-btn" (click)="toggle()">
       <i class="pi" [ngClass]="collapsed ? 'pi-angle-right' : 'pi-angle-left'"></i>

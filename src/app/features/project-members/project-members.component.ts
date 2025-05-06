@@ -451,21 +451,13 @@ export class ProjectMembersComponent implements OnInit {
       )
       .subscribe({
         next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Succès',
-            detail: 'Membre ajouté au projet avec succès'
-          });
+          // Le message de succès est déjà affiché par le service utilisateur
           this.addMemberDialog = false;
           this.loadMembers();
         },
         error: (err) => {
           console.error('Failed to add member:', err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible d\'ajouter le membre au projet'
-          });
+          // Le message d'erreur est déjà affiché par le service utilisateur
         }
       });
   }
@@ -507,21 +499,13 @@ export class ProjectMembersComponent implements OnInit {
           )
           .subscribe({
             next: () => {
-              this.messageService.add({
-                severity: 'success',
-                summary: 'Succès',
-                detail: 'Rôle mis à jour avec succès'
-              });
+              // Le message de succès est déjà affiché par le service utilisateur
               this.editRoleDialog = false;
               this.loadMembers();
             },
             error: (err) => {
               console.error('Failed to update role:', err);
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Erreur',
-                detail: 'Impossible de mettre à jour le rôle'
-              });
+              // Le message d'erreur est déjà affiché par le service utilisateur
             }
           });
       });
@@ -550,20 +534,12 @@ export class ProjectMembersComponent implements OnInit {
     this.userService.removeUserFromProject(this.projectId, member.userId)
       .subscribe({
         next: () => {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Succès',
-            detail: 'Membre retiré du projet avec succès'
-          });
+          // Le message de succès est déjà affiché par le service utilisateur
           this.loadMembers();
         },
         error: (err) => {
           console.error('Failed to remove member:', err);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erreur',
-            detail: 'Impossible de retirer le membre du projet'
-          });
+          // Le message d'erreur est déjà affiché par le service utilisateur
         }
       });
   }

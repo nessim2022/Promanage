@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { MessageService } from 'primeng/api';
@@ -80,30 +80,36 @@ export class UserService {
     console.log(`Récupération des membres pour le projet ${projectId} depuis ${url}`);
     
     return this.http.get<ProjectMember[]>(url, { 
-      headers: this.getHeaders() 
+      headers: this.getHeaders(),
+      withCredentials: true
     })
       .pipe(
         tap(members => {
           console.log(`Récupération de ${members.length} membres pour le projet ${projectId}`);
-          // Informer l'utilisateur que les données sont chargées correctement
-          // Nous n'affichons ce message que lors du premier chargement réussi après correction
-          if (members.length > 0) {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Succès',
-              detail: 'Les membres du projet ont été chargés avec succès.'
-            });
-          }
+          // Nous n'affichons pas de message de succès ici pour éviter de surcharger l'interface
         }),
         catchError(error => {
           console.error(`Erreur lors de la récupération des membres pour le projet ${projectId}:`, error);
           
-          // Gestion spécifique des erreurs 404
-          if (error.status === 404) {
+          if (error.status === 0) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur de connexion',
+              detail: 'Impossible de se connecter au serveur. Veuillez vérifier que le serveur backend est en cours d\'exécution et que le port 8082 est accessible.'
+            });
+            return of([]);
+          } else if (error.status === 404) {
             this.messageService.add({
               severity: 'warn',
               summary: 'Endpoint non trouvé',
               detail: 'Le endpoint pour les membres du projet est introuvable. Veuillez vérifier l\'URL.'
+            });
+            return of([]);
+          } else if (error.status === 403) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Accès refusé',
+              detail: 'Vous n\'avez pas les droits nécessaires pour accéder à cette ressource.'
             });
             return of([]);
           }
@@ -127,47 +133,94 @@ export class UserService {
     };
     
     console.log(`Tentative d'ajout de l'utilisateur ${userId} au projet ${projectId} avec le rôle ${role}`);
+    console.log(`URL d'API utilisée: ${this.apiUrl}/projects/${projectId}/users`);
     
-    // Endpoint: /api/projects/{projectId}/users
+    // Utilisation de withCredentials pour s'assurer que les cookies sont envoyés
+    // et augmentation du timeout pour éviter les erreurs de délai d'attente
     return this.http.post(`${this.apiUrl}/projects/${projectId}/users`, data, { 
-      headers: this.getHeaders() 
+      headers: this.getHeaders(),
+      withCredentials: true,
+      observe: 'response'
     }).pipe(
+      map(response => response.body),
       catchError(error => {
         console.error(`Erreur lors de l'ajout de l'utilisateur au projet:`, error);
         if (error.status === 0) {
           this.messageService.add({
             severity: 'error',
             summary: 'Erreur de connexion',
-            detail: 'Impossible de se connecter au serveur. Veuillez vérifier votre connexion.'
+            detail: 'Impossible de se connecter au serveur. Veuillez vérifier que le serveur backend est en cours d\'exécution et que le port 8082 est accessible.'
+          });
+        } else if (error.status === 403) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Accès refusé',
+            detail: 'Vous n\'avez pas les droits nécessaires pour effectuer cette action.'
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: `Erreur lors de l'ajout de l'utilisateur: ${error.message || 'Erreur inconnue'}`
           });
         }
-        throw error;
+        return throwError(() => error);
       }),
-      tap(() => console.log(`Utilisateur ${userId} ajouté au projet ${projectId} avec le rôle ${role}`)),
-      catchError(error => {
-        console.error(`Erreur lors de l'ajout de l'utilisateur au projet:`, error);
-        throw error;
+      tap(() => {
+        console.log(`Utilisateur ${userId} ajouté au projet ${projectId} avec le rôle ${role}`);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Membre ajouté au projet avec succès'
+        });
       })
     );
   }
   
   // Retirer un utilisateur d'un projet
   removeUserFromProject(projectId: number, userId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/projects/${projectId}/users/${userId}`, { headers: this.getHeaders() })
-      .pipe(
-        tap(() => console.log(`Removed user ${userId} from project ${projectId}`)),
-        catchError(error => {
-          console.error(`Error removing user from project:`, error);
-          if (error.status === 0) {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erreur de connexion',
-              detail: 'Impossible de se connecter au serveur. Veuillez vérifier votre connexion.'
-            });
-          }
-          throw error;
-        })
-      );
+    console.log(`Tentative de suppression de l'utilisateur ${userId} du projet ${projectId}`);
+    console.log(`URL d'API utilisée: ${this.apiUrl}/projects/${projectId}/users/${userId}`);
+    
+    return this.http.delete(`${this.apiUrl}/projects/${projectId}/users/${userId}`, { 
+      headers: this.getHeaders(),
+      withCredentials: true,
+      observe: 'response'
+    })
+    .pipe(
+      map(response => response.body),
+      tap(() => {
+        console.log(`Utilisateur ${userId} retiré du projet ${projectId}`);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Membre retiré du projet avec succès'
+        });
+      }),
+      catchError(error => {
+        console.error(`Erreur lors de la suppression de l'utilisateur du projet:`, error);
+        if (error.status === 0) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur de connexion',
+            detail: 'Impossible de se connecter au serveur. Veuillez vérifier que le serveur backend est en cours d\'exécution et que le port 8082 est accessible.'
+          });
+        } else if (error.status === 403) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Accès refusé',
+            detail: 'Vous n\'avez pas les droits nécessaires pour effectuer cette action.'
+          });
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: `Erreur lors de la suppression du membre: ${error.message || 'Erreur inconnue'}`
+          });
+        }
+        return throwError(() => error);
+      })
+    );
   }
   
   // Mettre à jour un utilisateur
