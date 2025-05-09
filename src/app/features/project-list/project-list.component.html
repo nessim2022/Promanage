@@ -47,7 +47,13 @@
   </p-table>
 </p-card>
 
-<div *ngIf="selectedProjectId">
+<div *ngIf="selectedProjectId" class="selected-project-documents">
   <h3><i class="pi pi-folder-open"></i> Documents du projet sélectionné</h3>
-  <app-document-list [projectId]="selectedProjectId"></app-document-list>
+  <div class="document-container">
+    <app-document-list [projectId]="selectedProjectId"></app-document-list>
+  </div>
+  <div class="back-button-container">
+    <button pButton pRipple type="button" icon="pi pi-arrow-left" label="Retour à la liste des projets" 
+            class="p-button-outlined p-button-secondary" (click)="selectedProjectId = undefined"></button>
+  </div>
 </div>

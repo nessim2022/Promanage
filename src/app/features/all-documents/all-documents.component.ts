@@ -19,6 +19,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { ProjectService } from '../../core/services/project.service';
 import { ProjectDTO } from '../../shared/models/project';
 import { AccordionModule } from 'primeng/accordion';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-all-documents',
@@ -124,7 +125,8 @@ export class AllDocumentsComponent implements OnInit {
     private documentService: DocumentService,
     private projectService: ProjectService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -133,7 +135,16 @@ export class AllDocumentsComponent implements OnInit {
 
   loadProjectsWithDocuments() {
     this.loading = true;
-    this.projectService.getAllProjects().pipe(
+    
+    // Déterminer si l'utilisateur est admin ou utilisateur normal
+    const isAdmin = this.authService.isSuperAdmin();
+    
+    // Choisir la méthode appropriée pour récupérer les projets
+    const projectObservable = isAdmin ? 
+      this.projectService.getAllProjects() : 
+      this.projectService.getProjectsForCurrentUser();
+    
+    projectObservable.pipe(
       catchError(error => {
         this.messageService.add({
           severity: 'error',
@@ -145,15 +156,19 @@ export class AllDocumentsComponent implements OnInit {
     ).subscribe(projects => {
       // Pour chaque projet, charger ses documents
       Promise.all(projects.map(project =>
-        this.documentService.getDocumentsByProject(project.projectId).pipe(
-          catchError(error => of([]))
+        this.documentService.getDocumentsByProject(project.projectId, isAdmin).pipe(
+          catchError(error => {
+            console.error(`Erreur lors du chargement des documents pour le projet ${project.projectId}:`, error);
+            return of([]);
+          })
         ).toPromise()
         .then(documents => ({
           ...project,
           documents: documents || []
         }))
       )).then(projectsWithDocs => {
-        this.projectsWithDocuments = projectsWithDocs;
+        // Filtrer pour ne garder que les projets avec des documents
+        this.projectsWithDocuments = projectsWithDocs.filter(project => project.documents.length > 0);
         this.loading = false;
       });
     });

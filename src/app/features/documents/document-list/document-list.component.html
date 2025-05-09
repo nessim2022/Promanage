@@ -1,0 +1,86 @@
+<div class="document-list-container">
+  <!-- Alerte pour le statut du service documentaire -->
+  <p-message *ngIf="!alfrescoAvailable" severity="warn" text="Le service documentaire est partiellement disponible. Certaines fonctionnalités peuvent être limitées." styleClass="mb-3 w-full"></p-message>
+  <p-confirmDialog></p-confirmDialog>
+  
+  <div class="card">
+    <h2 class="document-section-title">Documents du projet</h2>
+    
+    <p-table 
+      [value]="documents" 
+      [loading]="loading"
+      styleClass="p-datatable-sm p-datatable-striped" 
+      [paginator]="true" 
+      [rows]="10"
+      [showCurrentPageReport]="true" 
+      currentPageReportTemplate="{first} à {last} sur {totalRecords} documents"
+      [rowsPerPageOptions]="[5,10,25,50]"
+      [globalFilterFields]="['title', 'fileName']"
+      responsiveLayout="scroll">
+      
+      <ng-template pTemplate="caption">
+        <div class="table-header">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" placeholder="Rechercher..." #filter (input)="dt.filterGlobal(filter.value, 'contains')" />
+          </span>
+        </div>
+      </ng-template>
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="title" style="width: 30%">Titre <p-sortIcon field="title"></p-sortIcon></th>
+          <th pSortableColumn="fileName" style="width: 25%">Nom du fichier <p-sortIcon field="fileName"></p-sortIcon></th>
+          <th pSortableColumn="creationDate" style="width: 15%">Date de création <p-sortIcon field="creationDate"></p-sortIcon></th>
+          <th pSortableColumn="type" style="width: 15%">Type <p-sortIcon field="type"></p-sortIcon></th>
+          <th style="width: 15%">Actions</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-document>
+        <tr>
+          <td>
+            <div class="document-title">
+              <span [pTooltip]="document.title" tooltipPosition="top">{{ document.title || 'Sans titre' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="document-filename">
+              <span [pTooltip]="document.fileName" tooltipPosition="top">{{ document.fileName || 'Sans nom' }}</span>
+            </div>
+          </td>
+          <td>
+            <span>{{ document.creationDate | date:'dd/MM/yyyy' }}</span>
+          </td>
+          <td>
+            <span class="document-type" [ngClass]="{'external-document': document.isExternal}">
+              <i class="pi" [ngClass]="document.isExternal ? 'pi-link' : 'pi-file'"></i>
+              {{ document.isExternal ? 'Lien externe' : (document.type || 'Document') }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button pButton pRipple icon="pi pi-download" class="p-button-rounded p-button-info p-button-sm" 
+                      (click)="downloadDocument(document)" 
+                      pTooltip="Télécharger" tooltipPosition="top"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm" 
+                      (click)="deleteDocument(document)" 
+                      pTooltip="Supprimer" tooltipPosition="top"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center">
+            <div class="empty-message">
+              <i class="pi pi-folder-open empty-icon"></i>
+              <p>Aucun document trouvé</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>

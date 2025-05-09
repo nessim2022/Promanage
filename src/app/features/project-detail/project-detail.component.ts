@@ -20,6 +20,7 @@ import { of } from 'rxjs';
 import { DocumentListComponent } from '../document-list/document-list.component';
 import { GitlabIntegrationComponent } from '../gitlab-integration/gitlab-integration.component';
 import { ProjectMembersComponent } from '../project-members/project-members.component';
+import { GitlabMembersComponent } from '../gitlab-members/gitlab-members.component';
 import { DocumentService } from '../../core/services/document.service';
 import type { Document } from '../../shared/models/document';
 
@@ -41,7 +42,8 @@ import type { Document } from '../../shared/models/document';
     ConfirmDialogModule,
     DocumentListComponent,
     GitlabIntegrationComponent,
-    ProjectMembersComponent
+    ProjectMembersComponent,
+    GitlabMembersComponent
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './project-detail.component.html',

@@ -4,7 +4,7 @@
   <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
   
   <div class="section-header">
-    <h2>Documents du projet</h2>
+    <h2>{{ projectId ? (selectedProjectName ? 'Documents du projet: ' + selectedProjectName : 'Documents du projet sélectionné') : 'Tous les documents' }}</h2>
     <div class="action-buttons">
       <button pButton pRipple type="button" icon="pi pi-refresh" 
               pTooltip="Rafraîchir la liste" tooltipPosition="top"
@@ -34,20 +34,20 @@
   </div>
     
   <div *ngIf="!loading && !error" class="documents-section">
-    <div *ngIf="documents.length === 0" class="no-documents">
+    <div *ngIf="visibleDocuments.length === 0" class="no-documents">
       <p-card styleClass="empty-card">
         <div class="empty-message">
           <i class="pi pi-info-circle"></i>
-          <span>Aucun document n'a été ajouté à ce projet.</span>
+          <span>{{ projectId ? 'Aucun document n\'a été ajouté à ce projet.' : 'Aucun document disponible.' }}</span>
         </div>
-        <div class="upload-button">
+        <div class="upload-button" *ngIf="canUpload">
           <button pButton pRipple type="button" label="Ajouter un document" icon="pi pi-plus" 
                   (click)="openUploadDialog()"></button>
         </div>
       </p-card>
     </div>
         
-    <div *ngIf="documents.length > 0" class="documents-table">
+    <div *ngIf="visibleDocuments.length > 0" class="documents-table">
       <p-table [value]="visibleDocuments"
                [paginator]="true"
                [rows]="10"
@@ -77,15 +77,26 @@
               <i [ngClass]="getFileIconClass(document)" class="file-icon" aria-label="Type de fichier"></i>
             </td>
             <td>
-              <div class="document-title" [pTooltip]="document.title" tooltipPosition="top">{{ document.title }}</div>
+              <div class="document-title-container">
+                <div class="document-title" [pTooltip]="document.title" tooltipPosition="top">
+                  <i class="pi pi-file-edit mr-2"></i>{{ document.title }}
+                </div>
+              </div>
             </td>
             <td>
-              <div class="file-name" [pTooltip]="document.fileName" tooltipPosition="top">{{ document.fileName }}</div>
+              <div class="file-name-container">
+                <div class="file-name" [pTooltip]="document.fileName" tooltipPosition="top">
+                  <i class="pi pi-file mr-2"></i>{{ document.fileName }}
+                </div>
+              </div>
             </td>
             <td>
               <div class="date-container">
-                <i class="pi pi-calendar-plus"></i>
-                <span>{{ document.creationDate | date:'dd/MM/yyyy HH:mm' }}</span>
+                <div class="date-value">
+                  <i class="pi pi-calendar-plus"></i>
+                  <span class="date">{{ document.creationDate | date:'dd/MM/yyyy' }}</span>
+                  <span class="time">{{ document.creationDate | date:'HH:mm' }}</span>
+                </div>
               </div>
             </td>
             <td>
@@ -141,7 +152,8 @@
         <label for="docTitle">Titre du document <span class="required-field">*</span></label>
         <input id="docTitle" type="text" pInputText [(ngModel)]="documentTitle" 
                placeholder="Entrer un titre descriptif" required 
-               [disabled]="uploading">
+               [disabled]="uploading"
+               (input)="onDocumentTitleChange()">
       </div>
             
       <div class="form-group">
@@ -181,16 +193,18 @@
     <div class="upload-form">
       <div class="form-group">
         <label for="linkTitle">Titre du lien <span class="required-field">*</span></label>
-        <input id="linkTitle" type="text" pInputText [(ngModel)]="documentTitle" 
+        <input id="linkTitle" type="text" pInputText [(ngModel)]="externalLinkTitle" 
                placeholder="Entrer un titre descriptif" required 
-               [disabled]="uploading">
+               [disabled]="uploading"
+               (input)="updateCanAddLink()">
       </div>
             
       <div class="form-group">
         <label for="externalUrl">URL <span class="required-field">*</span></label>
         <input id="externalUrl" type="url" pInputText [(ngModel)]="externalUrl" 
                placeholder="https://..." required 
-               [disabled]="uploading">
+               [disabled]="uploading"
+               (input)="updateCanAddLink()">
       </div>
     </div>
     <ng-template pTemplate="footer">
