@@ -2,8 +2,29 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
-import { LoginCredentials, RegisterData, AuthResponse } from '../models/auth.models';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from '../../../environments/environment';
+import { MessageService } from 'primeng/api';
+import { Router } from '@angular/router';
+
+// Interfaces pour les types
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+export interface AuthResponse {
+  authenticationToken: string;
+  refreshToken: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -12,78 +33,72 @@ export class AuthService {
   private readonly USER_KEY = 'auth_user';
   private isAuthenticated = new BehaviorSubject<boolean>(this.hasToken());
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private messageService: MessageService,
+    private router: Router
+  ) {}
 
   register(userData: RegisterData): Observable<AuthResponse> {
-    const registerUrl = '/auth/register';
+    const registerUrl = `${environment.backendUrl}/auth/register`;
     console.log(`Service: Envoi de la requête d'inscription à ${registerUrl}`);
     
-    return this.http.post<AuthResponse>(registerUrl, userData)
-      .pipe(
-        tap(response => console.log('Service: Réponse d\'inscription reçue:', response)),
-        catchError(this.handleError('Inscription', userData))
-      );
+    return this.http.post<AuthResponse>(registerUrl, userData).pipe(
+      tap(response => {
+        console.log('Service: Réponse d\'inscription reçue:', response);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Inscription réussie',
+          detail: 'Votre compte a été créé avec succès.'
+        });
+      }),
+      catchError(this.handleError('Inscription', userData))
+    );
   }
 
   login(credentials: LoginCredentials): Observable<AuthResponse> {
-    // Supprimer les tokens existants avant la connexion
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     this.isAuthenticated.next(false);
 
-    const loginUrl = '/auth/login';
-    return this.http.post<any>(loginUrl, credentials).pipe(
-      tap((response: any) => {
-        // 1. Extraction du token
-        let token = null;
-        const possibleKeys = [
-          'token', 'accessToken', 'authToken', 'access_token', 'auth_token'
-        ];
-        for (const key of possibleKeys) {
-          if (response[key]) {
-            token = response[key];
-            break;
-          }
-        }
-        if (!token && response.data && response.data.token) {
-          token = response.data.token;
-        }
-        // Fallback : chercher n'importe quelle propriété contenant 'token'
-        if (!token) {
-          for (const key in response) {
-            if (typeof response[key] === 'string' && key.toLowerCase().includes('token')) {
-              token = response[key];
-              break;
-            }
-          }
-        }
-        // 2. Stockage du token
+    const loginUrl = `${environment.backendUrl}/auth/login`;
+    console.log(`Tentative de connexion avec l'URL: ${loginUrl}`);
+    
+    const httpOptions = {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      withCredentials: true
+    };
+    
+    return this.http.post<AuthResponse>(loginUrl, credentials, httpOptions).pipe(
+      tap((response: AuthResponse) => {
+        console.log('Réponse complète de login:', JSON.stringify(response, null, 2));
+        const token = response.authenticationToken;
         if (token) {
+          console.log('Token trouvé et stocké:', token);
           localStorage.setItem(this.TOKEN_KEY, token);
-          const decoded: any = jwtDecode (token); const user = {
+          const decoded: any = jwtDecode(token);
+          console.log('Payload du token:', decoded);
+          const user = {
             email: decoded.sub,
-            roles: decoded.roles 
+            roles: decoded.roles || decoded.authorities || []
           };
+          console.log('Utilisateur stocké:', user);
+          if (!user.roles.includes('ROLE_USER')) {
+            console.warn('ROLE_USER manquant dans le token');
+          }
           localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+          this.isAuthenticated.next(true);
         } else {
-          console.error('Aucun token trouvé dans la réponse');
+          console.error('Aucun token trouvé dans la réponse:', response);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur de connexion',
+            detail: 'Aucun token reçu du serveur.'
+          });
         }
-
-        // 3. Extraction et stockage de l'utilisateur
-      //   let user = response.user || response.userData || (response.data && response.data.user) || null;
-      //   debugger;
-      //   console.log('User:', user);
-      //   if (user) {
-      //     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-      //   } else if (credentials && credentials.email === 'admin@example.com') {
-      //     // Fallback for super admin if backend does not return user object
-      //     const fallbackUser = {
-      //       email: credentials.email,
-      //       roles: [{ authority: 'superAdmin' }]
-      //     };
-      //     localStorage.setItem(this.USER_KEY, JSON.stringify(fallbackUser));
-      //   }
-      //   this.isAuthenticated.next(!!token);
       }),
       catchError(this.handleError('Connexion', credentials))
     );
@@ -94,19 +109,45 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     this.isAuthenticated.next(false);
     console.log('Déconnexion effectuée');
+    this.router.navigate(['/login']);
   }
 
   isLoggedIn(): boolean {
     const hasToken = this.hasToken();
     console.log('Vérification d\'authentification - Token présent:', hasToken);
+    // Mettre à jour le BehaviorSubject si nécessaire
+    if (hasToken !== this.isAuthenticated.value) {
+      this.isAuthenticated.next(hasToken);
+    }
     return hasToken;
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    const token = localStorage.getItem(this.TOKEN_KEY);
+    if (!token) {
+      console.log('Aucun token trouvé dans le localStorage');
+      return null;
+    }
+    
+    try {
+      // Vérifier si le token est expiré
+      const decoded: any = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      
+      if (decoded.exp && decoded.exp < currentTime) {
+        console.warn('Token expiré, déconnexion automatique');
+        this.logout();
+        return null;
+      }
+      
+      return token;
+    } catch (error) {
+      console.error('Erreur lors de la vérification du token:', error);
+      return token; // Retourner le token même s'il ne peut pas être décodé
+    }
   }
 
-  public getCurrentUser(): any {
+  getCurrentUser(): any {
     const userString = localStorage.getItem(this.USER_KEY);
     if (userString) {
       try {
@@ -122,44 +163,41 @@ export class AuthService {
   private setToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
-  
+
   private setUser(user: any): void {
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
   }
 
   private hasToken(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    return !!token && token.length > 10; // Vérification basique que le token semble valide
   }
 
-  public isSuperAdmin(): boolean {
-  const user = this.getCurrentUser();
-  // Super admin: either by email or by role
-  return (
-    user && (
-      user.email === 'admin@example.com' ||
-      (user.roles && Array.isArray(user.roles) && user.roles.some((role: { authority: string }) => role.authority === 'superAdmin'))
-    )
-  );
-}
+  isSuperAdmin(): boolean {
+    const user = this.getCurrentUser();
+    return (
+      user &&
+      (user.email === 'admin@example.com' ||
+        (user.roles &&
+          Array.isArray(user.roles) &&
+          user.roles.some((role: string) => role === 'superAdmin')))
+    );
+  }
 
-public getUserEmail(): string | null {
-  const user = this.getCurrentUser();
-  return user && user.email ? user.email : null;
-}
+  getUserEmail(): string | null {
+    const user = this.getCurrentUser();
+    return user && user.email ? user.email : null;
+  }
 
-public getUserProjectIds(): string[] {
-  const user = this.getCurrentUser();
-  // Adapt this if your user object structure is different!
-  return user && user.projects ? user.projects : [];
-}
+  getUserProjectIds(): string[] {
+    const user = this.getCurrentUser();
+    return user && user.projects ? user.projects : [];
+  }
 
-
-  // Gestionnaire d'erreur amélioré pour les opérations d'authentification
   private handleError(operation: string, data?: any) {
     return (error: HttpErrorResponse): Observable<never> => {
       console.error(`Erreur lors de l'opération ${operation}:`, error);
       
-      // Logs détaillés pour le débogage
       console.log('Détails de la requête:', {
         operation,
         data,
@@ -169,15 +207,12 @@ public getUserProjectIds(): string[] {
         error: error.error
       });
       
-      // Messages d'erreur plus informatifs basés sur le type d'erreur
       let errorMessage = '';
       
       if (error.status === 0) {
         errorMessage = 'Problème de réseau ou serveur inaccessible.';
       } else if (error.status === 400) {
         errorMessage = 'Données invalides. Veuillez vérifier vos informations.';
-        
-        // Si une erreur spécifique est retournée par le serveur
         if (error.error && error.error.message) {
           errorMessage = error.error.message;
         } else if (error.error && typeof error.error === 'string') {
@@ -194,6 +229,12 @@ public getUserProjectIds(): string[] {
       } else {
         errorMessage = `Erreur ${error.status}: ${error.error?.message || error.statusText || 'Erreur inconnue'}`;
       }
+      
+      this.messageService.add({
+        severity: 'error',
+        summary: `Erreur lors de ${operation}`,
+        detail: errorMessage
+      });
       
       return throwError(() => ({
         status: error.status,

@@ -3,13 +3,21 @@ import { ActivatedRoute } from '@angular/router';
 import { DocumentService } from '../../../core/services/document.service';
 import { Document } from '../../../shared/models/document';
 import { MessageService } from 'primeng/api';
+import { DocumentListComponent } from "../../documents/document-list/document-list.component";
 
 @Component({
   selector: 'app-project-documents',
   templateUrl: './project-documents.component.html',
-  styleUrls: ['./project-documents.component.scss']
+  imports: [DocumentListComponent],
+
 })
 export class ProjectDocumentsComponent implements OnInit {
+showAddDocumentDialog() {
+throw new Error('Method not implemented.');
+}
+showAddExternalLinkDialog() {
+throw new Error('Method not implemented.');
+}
   projectId: number | null = null;
   documents: Document[] = [];
   loading: boolean = true;

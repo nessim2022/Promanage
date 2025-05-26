@@ -81,18 +81,30 @@ export class LoginComponent {
             const token = localStorage.getItem('auth_token');
             console.log('Token stocké après connexion:', token ? (token.substring(0, 10) + '...') : 'null');
             
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Succès',
-              detail: 'Connexion réussie, redirection...'
-            });
-            
-            // Attendre que le message s'affiche puis rediriger
-            setTimeout(() => {
-              // Force la navigation directe pour recharger complètement l'application 
-              // et s'assurer que le token est appliqué
-              window.location.href = '/dashboard';
-            }, 1000);
+            // Vérifier explicitement que l'authentification est bien établie
+            if (this.authService.isLoggedIn()) {
+              console.log('Authentification confirmée, redirection vers le tableau de bord');
+              
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Succès',
+                detail: 'Connexion réussie, redirection...'
+              });
+              
+              // Attendre que le message s'affiche puis rediriger
+              setTimeout(() => {
+                // Force la navigation directe pour recharger complètement l'application 
+                // et s'assurer que le token est appliqué
+                window.location.href = '/dashboard';
+              }, 1500);
+            } else {
+              console.error('Échec de l\'authentification malgré une réponse positive du serveur');
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Erreur',
+                detail: 'Problème d\'authentification. Veuillez réessayer.'
+              });
+            }
           },
           error: (error: HttpErrorResponse) => {
             console.error('Erreur de connexion détaillée:', error);

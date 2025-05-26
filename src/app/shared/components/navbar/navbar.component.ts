@@ -10,6 +10,8 @@ import { DividerModule } from 'primeng/divider';
 import { LanguageSelectorComponent } from '../language-selector/language-selector.component';
 import { OverlayPanelModule } from 'primeng/overlaypanel';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { DocumentService } from '../../../core/services/document.service';
+import { BadgeModule } from 'primeng/badge';
 
 @Component({
   selector: 'app-navbar',
@@ -22,7 +24,8 @@ import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
     AvatarModule, 
     DividerModule,
     LanguageSelectorComponent,
-    OverlayPanelModule
+    OverlayPanelModule,
+    BadgeModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   templateUrl: './navbar.component.html',
@@ -32,12 +35,35 @@ export class NavbarComponent implements OnInit {
   userMenuItems: MenuItem[] = [];
   userName: string = '';
   userInitials: string = '';
+  alfrescoAvailable: boolean = false;
+  connectorName: string = '';
+  isSuperAdmin: boolean = false;
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(
+    private authService: AuthService, 
+    private router: Router,
+    private documentService: DocumentService
+  ) { }
 
   ngOnInit(): void {
     this.setupUserMenu();
     this.loadUserInfo();
+    this.checkAlfrescoAvailability();
+  }
+
+  checkAlfrescoAvailability(): void {
+    if (this.isLoggedIn()) {
+      this.documentService.checkAlfrescoAvailability().subscribe({
+        next: (isAvailable) => {
+          this.alfrescoAvailable = isAvailable;
+          this.connectorName = isAvailable ? 'Alfresco' : 'Local';
+        },
+        error: () => {
+          this.alfrescoAvailable = false;
+          this.connectorName = 'Local';
+        }
+      });
+    }
   }
 
   private setupUserMenu(): void {
@@ -78,6 +104,7 @@ export class NavbarComponent implements OnInit {
       const firstInitial = user.firstName ? user.firstName.charAt(0) : '';
       const lastInitial = user.lastName ? user.lastName.charAt(0) : '';
       this.userInitials = (firstInitial + lastInitial).toUpperCase();
+      this.isSuperAdmin = this.authService.isSuperAdmin();
     }
   }
 

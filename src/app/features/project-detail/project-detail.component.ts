@@ -17,7 +17,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { DocumentListComponent } from '../document-list/document-list.component';
+import { DocumentListComponent } from '../documents/document-list/document-list.component';
 import { GitlabIntegrationComponent } from '../gitlab-integration/gitlab-integration.component';
 import { ProjectMembersComponent } from '../project-members/project-members.component';
 import { GitlabMembersComponent } from '../gitlab-members/gitlab-members.component';
@@ -251,7 +251,18 @@ export class ProjectDetailComponent implements OnInit {
 
   openGitLabUrl() {
     if (this.project && this.project.gitlabURL && this.project.gitlabURL.trim().length > 0) {
-      window.open(this.project.gitlabURL, '_blank');
+      // Assurez-vous que l'URL commence par http:// ou https://
+      let url = this.project.gitlabURL;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+      }
+      window.open(url, '_blank');
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'URL GitLab manquante',
+        detail: 'Ce projet n\'a pas d\'URL GitLab configurée.'
+      });
     }
   }
 

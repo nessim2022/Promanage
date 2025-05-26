@@ -12,10 +12,10 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { RippleModule } from 'primeng/ripple';
+import { MessageModule } from 'primeng/message';
 
 @NgModule({
   declarations: [
-    DocumentListComponent
   ],
   imports: [
     CommonModule,
@@ -27,7 +27,9 @@ import { RippleModule } from 'primeng/ripple';
     InputTextModule,
     TooltipModule,
     ConfirmDialogModule,
-    RippleModule
+    RippleModule,
+    MessageModule,
+    DocumentListComponent
   ],
   exports: [
     DocumentListComponent

@@ -41,6 +41,11 @@ export class UserService {
     private messageService: MessageService
   ) {}
   
+  // Fonction utilitaire pour s'assurer que les URLs ne se terminent pas par des deux-points
+  private ensureValidUrl(url: string): string {
+    return url.endsWith(':') ? url.slice(0, -1) : url;
+  }
+  
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('auth_token');
     return new HttpHeaders({
@@ -51,7 +56,10 @@ export class UserService {
   
   // Récupérer tous les utilisateurs
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/users`, { headers: this.getHeaders() })
+    // Utilisation de ensureValidUrl pour éviter les problèmes d'URL
+    const url = this.ensureValidUrl(`${this.apiUrl}/users`);
+    
+    return this.http.get<User[]>(url, { headers: this.getHeaders() })
       .pipe(
         tap(users => console.log(`Fetched ${users.length} users`)),
         catchError(error => {
@@ -63,7 +71,10 @@ export class UserService {
   
   // Récupérer un utilisateur par ID
   getUserById(id: number): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/users/${id}`, { headers: this.getHeaders() })
+    // Utilisation de ensureValidUrl pour éviter les problèmes d'URL
+    const url = this.ensureValidUrl(`${this.apiUrl}/users/${id}`);
+    
+    return this.http.get<User>(url, { headers: this.getHeaders() })
       .pipe(
         tap(user => console.log(`Fetched user with ID ${id}`)),
         catchError(error => {
@@ -75,9 +86,9 @@ export class UserService {
   
   // Récupérer les membres d'un projet spécifique
   getProjectMembers(projectId: number): Observable<ProjectMember[]> {
-    // Utiliser le bon chemin d'API avec l'ID du projet
-    const url = `${this.apiUrl}/projects/${projectId}/users`;
-    console.log(`Récupération des membres pour le projet ${projectId} depuis ${url}`);
+    // Utilisation de ensureValidUrl pour éviter les problèmes d'URL
+    const url = this.ensureValidUrl(`${environment.apiUrl}/projects/${projectId}/members`);
+    console.log(`Récupération des membres pour le projet ${projectId} depuis: ${url}`);
     
     return this.http.get<ProjectMember[]>(url, { 
       headers: this.getHeaders(),
@@ -101,8 +112,8 @@ export class UserService {
           } else if (error.status === 404) {
             this.messageService.add({
               severity: 'warn',
-              summary: 'Endpoint non trouvé',
-              detail: 'Le endpoint pour les membres du projet est introuvable. Veuillez vérifier l\'URL.'
+              summary: 'Membres non trouvés',
+              detail: `Aucun membre trouvé pour le projet ${projectId}.`
             });
             return of([]);
           } else if (error.status === 403) {

@@ -5,7 +5,7 @@ import { authGuard } from './core/guards/auth.guard';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { ProjectListComponent } from './features/project-list/project-list.component';
 import { ProjectDetailComponent } from './features/project-detail/project-detail.component';
-import { DocumentListComponent } from './features/document-list/document-list.component';
+import { DocumentListComponent } from './features/documents/document-list/document-list.component';
 import { GitlabIntegrationComponent } from './features/gitlab-integration/gitlab-integration.component';
 import { NotificationListComponent } from './features/notification-list/notification-list.component';
 import { AllDocumentsComponent } from './features/all-documents/all-documents.component';

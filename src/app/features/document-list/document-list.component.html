@@ -1,222 +1,144 @@
-<!-- src/app/features/document-list/document-list.component.html -->
 <div class="document-list-container">
   <p-toast></p-toast>
-  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
-  
-  <div class="section-header">
-    <h2>{{ projectId ? (selectedProjectName ? 'Documents du projet: ' + selectedProjectName : 'Documents du projet sélectionné') : 'Tous les documents' }}</h2>
-    <div class="action-buttons">
-      <button pButton pRipple type="button" icon="pi pi-refresh" 
-              pTooltip="Rafraîchir la liste" tooltipPosition="top"
-              class="p-button-outlined p-button-secondary mr-2" (click)="refreshDocuments()"></button>
-      <button *ngIf="canUploadDocument()" pButton pRipple type="button" icon="pi pi-plus" label="Ajouter un document" 
-              class="p-button-primary mr-2" (click)="openUploadDialog()"></button>
-      <button *ngIf="canAddExternalLink()" pButton pRipple type="button" icon="pi pi-link" label="Ajouter un lien externe" 
-              class="p-button-secondary" (click)="openExternalLinkDialog()"></button>
+  <p-confirmDialog></p-confirmDialog>
+  <p-message *ngIf="!alfrescoAvailable" severity="warn" 
+  text="Le service documentaire est partiellement disponible. Certaines fonctionnalités peuvent être limitées." 
+  styleClass="mb-3 w-full"></p-message>
+
+  <div class="card">
+    <h2 class="document-section-title">Documents du projet</h2>
+
+    <div class="toolbar mb-3">
+      <button pButton pRipple label="Ajouter un document" icon="pi pi-upload" class="p-button-primary mr-2"
+              (click)="openUploadDialog(false)" [disabled]="!projectId || !canUploadDocument()"></button>
+      <button pButton pRipple label="Ajouter via Alfresco" icon="pi pi-upload" class="p-button-secondary mr-2"
+              (click)="openUploadDialog(true)" [disabled]="!projectId || !canUploadDocument()"></button>
+      <button pButton pRipple label="Actualiser" icon="pi pi-refresh" class="p-button-text"
+              (click)="loadDocuments()"></button>
     </div>
-  </div>
+
+    <p-table 
+      [value]="visibleDocuments" 
+      [loading]="loading"
+      styleClass="p-datatable-sm p-datatable-striped" 
+      [paginator]="true" 
+      [rows]="10"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="{first} à {last} sur {totalRecords} documents"
+      [rowsPerPageOptions]="[5,10,25,50]"
+      [globalFilterFields]="['title', 'fileName']"
+      responsiveLayout="scroll"
+      #dt>
       
-  <div *ngIf="loading" class="loading-container">
-    <p-progressBar mode="indeterminate"></p-progressBar>
-    <div class="loading-text">Chargement des documents...</div>
-  </div>
-    
-  <div *ngIf="error && !loading" class="error-container">
-    <p-card styleClass="error-card">
-      <div class="error-message">
-        <i class="pi pi-exclamation-triangle"></i>
-        <span>{{ errorMessage }}</span>
-      </div>
-      <div class="retry-button">
-        <button pButton pRipple type="button" label="Réessayer" (click)="loadDocuments()"></button>
-      </div>
-    </p-card>
-  </div>
-    
-  <div *ngIf="!loading && !error" class="documents-section">
-    <div *ngIf="visibleDocuments.length === 0" class="no-documents">
-      <p-card styleClass="empty-card">
-        <div class="empty-message">
-          <i class="pi pi-info-circle"></i>
-          <span>{{ projectId ? 'Aucun document n\'a été ajouté à ce projet.' : 'Aucun document disponible.' }}</span>
+      <ng-template pTemplate="caption">
+        <div class="table-header">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" placeholder="Rechercher..." #filter 
+                   (input)="dt.filterGlobal(filter.value, 'contains')" />
+          </span>
         </div>
-        <div class="upload-button" *ngIf="canUpload">
-          <button pButton pRipple type="button" label="Ajouter un document" icon="pi pi-plus" 
-                  (click)="openUploadDialog()"></button>
-        </div>
-      </p-card>
-    </div>
-        
-    <div *ngIf="visibleDocuments.length > 0" class="documents-table">
-      <p-table [value]="visibleDocuments"
-               [paginator]="true"
-               [rows]="10"
-               [rowsPerPageOptions]="[5,10,25,50]"
-               [sortField]="'creationDate'"
-               [sortOrder]="-1"
-               styleClass="p-datatable-striped p-datatable-gridlines"
-               [loading]="loading"
-               responsiveLayout="scroll">
-        <ng-template pTemplate="caption">
-          <div class="document-summary">
-            <span class="document-count">{{ visibleDocuments.length }} document{{ visibleDocuments.length > 1 ? 's' : '' }}</span>
-          </div>
-        </ng-template>
-        <ng-template pTemplate="header">
-          <tr>
-            <th style="width: 5%">Type</th>
-            <th style="width: 30%" pSortableColumn="title">Titre <p-sortIcon field="title"></p-sortIcon></th>
-            <th style="width: 25%" pSortableColumn="fileName">Nom du fichier <p-sortIcon field="fileName"></p-sortIcon></th>
-            <th style="width: 25%" pSortableColumn="creationDate">Date d'ajout <p-sortIcon field="creationDate"></p-sortIcon></th>
-            <th style="width: 15%" class="actions-column">Actions</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-document>
-          <tr>
-            <td>
-              <i [ngClass]="getFileIconClass(document)" class="file-icon" aria-label="Type de fichier"></i>
-            </td>
-            <td>
-              <div class="document-title-container">
-                <div class="document-title" [pTooltip]="document.title" tooltipPosition="top">
-                  <i class="pi pi-file-edit mr-2"></i>{{ document.title }}
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="file-name-container">
-                <div class="file-name" [pTooltip]="document.fileName" tooltipPosition="top">
-                  <i class="pi pi-file mr-2"></i>{{ document.fileName }}
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="date-container">
-                <div class="date-value">
-                  <i class="pi pi-calendar-plus"></i>
-                  <span class="date">{{ document.creationDate | date:'dd/MM/yyyy' }}</span>
-                  <span class="time">{{ document.creationDate | date:'HH:mm' }}</span>
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="document-actions">
-                <button pButton pRipple type="button"
-                        [icon]="document.isExternal ? 'pi pi-external-link' : 'pi pi-download'"
-                        class="p-button-rounded p-button-info p-button-sm mr-2"
-                        [pTooltip]="document.isExternal ? 'Ouvrir le lien' : 'Télécharger'"
-                        tooltipPosition="top"
-                        (click)="downloadDocument(document)"
-                        [attr.aria-label]="document.isExternal ? 'Ouvrir le lien' : 'Télécharger' ">
-                </button>
-                <button *ngIf="canManageDocument(document)" pButton pRipple type="button" icon="pi pi-pencil"
-                        class="p-button-rounded p-button-warning p-button-sm mr-2"
-                        pTooltip="Éditer" tooltipPosition="top"
-                        (click)="editDocument(document)"
-                        aria-label="Éditer">
-                </button>
-                <button *ngIf="canManageDocument(document)" pButton pRipple type="button" icon="pi pi-trash"
-                        class="p-button-rounded p-button-danger p-button-sm"
-                        pTooltip="Supprimer" tooltipPosition="top"
-                        (click)="confirmDeleteDocument(document)"
-                        aria-label="Supprimer">
-                </button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="5" class="text-center">
-              <div class="empty-table-message">
-                <i class="pi pi-info-circle"></i>
-                <p>Aucun document trouvé.</p>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
-    </div>
+      </ng-template>
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="title" style="width: 30%">Titre <p-sortIcon field="title"></p-sortIcon></th>
+          <th pSortableColumn="fileName" style="width: 25%">Nom du fichier <p-sortIcon field="fileName"></p-sortIcon></th>
+          <th pSortableColumn="creationDate" style="width: 15%">Date de création <p-sortIcon field="creationDate"></p-sortIcon></th>
+          <th pSortableColumn="type" style="width: 15%">Type <p-sortIcon field="type"></p-sortIcon></th>
+          <th style="width: 15%">Actions</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-document>
+        <tr>
+          <td>
+            <div class="document-title">
+              <span [pTooltip]="document.title" tooltipPosition="top">{{ document.title || 'Sans titre' }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="document-filename">
+              <span [pTooltip]="document.fileName" tooltipPosition="top">{{ document.fileName || 'Sans nom' }}</span>
+            </div>
+          </td>
+          <td>
+            <span>{{ document.creationDate | date:'dd/MM/yyyy' }}</span>
+          </td>
+          <td>
+            <span class="document-type" [ngClass]="{'external-document': document.isExternal}">
+              <i class="pi" [ngClass]="getFileIconClass(document)"></i>
+              {{ document.isExternal ? 'Lien externe' : (document.type || 'Document') }}
+            </span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button pButton pRipple icon="pi pi-download" class="p-button-rounded p-button-info p-button-sm" 
+                      (click)="downloadDocument(document)" 
+                      pTooltip="Télécharger" tooltipPosition="top"></button>
+              <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm" 
+                      (click)="confirmDeleteDocument(document)" 
+                      pTooltip="Supprimer" tooltipPosition="top"
+                      [disabled]="!canManageDocument(document)"></button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="text-center">
+            <div class="empty-message">
+              <i class="pi pi-folder-open empty-icon"></i>
+              <p>Aucun document trouvé</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
   </div>
-        
-  <!-- Upload Dialog -->
-  <p-dialog [(visible)]="uploadDialog" 
-            [style]="{width: '500px'}" 
-            header="Ajouter un document" 
-            [modal]="true" 
-            [closable]="!uploading" 
-            [closeOnEscape]="!uploading"
-            [blockScroll]="true">
-    <div class="upload-form">
-      <div class="form-group">
-        <label for="docTitle">Titre du document <span class="required-field">*</span></label>
-        <input id="docTitle" type="text" pInputText [(ngModel)]="documentTitle" 
-               placeholder="Entrer un titre descriptif" required 
-               [disabled]="uploading"
-               (input)="onDocumentTitleChange()">
+
+  <!-- Dialog pour l'upload standard -->
+  <p-dialog header="Ajouter un document" [(visible)]="uploadDialog" [modal]="true" [style]="{width: '450px'}">
+    <div class="p-fluid">
+      <div class="p-field">
+        <label for="documentTitle">Titre</label>
+        <input pInputText id="documentTitle" [(ngModel)]="documentTitle" (ngModelChange)="onDocumentTitleChange()" />
       </div>
-            
-      <div class="form-group">
-        <label>Fichier <span class="required-field">*</span></label>
-        <p-fileUpload mode="basic" 
-                      chooseLabel="Sélectionner un fichier" 
-                      [showCancelButton]="false" 
-                      [auto]="false"
-                      [maxFileSize]="10000000" 
-                      (onSelect)="onFileSelect($event)" 
-                      [disabled]="uploading"
-                      accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.txt,.zip,.rar">
+      <div class="p-field">
+        <label>Fichier</label>
+        <p-fileUpload mode="basic" chooseLabel="Sélectionner un fichier" (onSelect)="onFileSelect($event)" 
+                      [auto]="true" [customUpload]="true" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png">
         </p-fileUpload>
       </div>
+      <p-message *ngIf="error" severity="error" [text]="errorMessage"></p-message>
     </div>
     <ng-template pTemplate="footer">
-      <button pButton pRipple type="button" label="Annuler" 
-              class="p-button-text" 
-              (click)="closeUploadDialog()" 
-              [disabled]="uploading"></button>
-      <button pButton pRipple type="button" label="Téléverser" 
-              class="p-button-primary" 
-              (click)="uploadDocument()" 
-              [disabled]="!canUpload || uploading"
-              [loading]="uploading"></button>
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="closeUploadDialog(false)"></button>
+      <button pButton pRipple label="Téléverser" icon="pi pi-upload" [disabled]="!canUpload || uploading" 
+              [loading]="uploading" (click)="uploadDocument(false)"></button>
     </ng-template>
   </p-dialog>
 
-  <!-- External Link Dialog -->
-  <p-dialog [(visible)]="externalLinkDialog" 
-            [style]="{width: '500px'}" 
-            header="Ajouter un lien externe" 
-            [modal]="true" 
-            [closable]="!uploading" 
-            [closeOnEscape]="!uploading"
-            [blockScroll]="true">
-    <div class="upload-form">
-      <div class="form-group">
-        <label for="linkTitle">Titre du lien <span class="required-field">*</span></label>
-        <input id="linkTitle" type="text" pInputText [(ngModel)]="externalLinkTitle" 
-               placeholder="Entrer un titre descriptif" required 
-               [disabled]="uploading"
-               (input)="updateCanAddLink()">
+  <!-- Dialog pour l'upload via Alfresco -->
+  <p-dialog header="Ajouter un document via Alfresco" [(visible)]="uploadAlfrescoDialog" [modal]="true" [style]="{width: '450px'}">
+    <div class="p-fluid">
+      <div class="p-field">
+        <label for="documentTitleAlfresco">Titre</label>
+        <input pInputText id="documentTitleAlfresco" [(ngModel)]="documentTitle" (ngModelChange)="onDocumentTitleChange()" />
       </div>
-            
-      <div class="form-group">
-        <label for="externalUrl">URL <span class="required-field">*</span></label>
-        <input id="externalUrl" type="url" pInputText [(ngModel)]="externalUrl" 
-               placeholder="https://..." required 
-               [disabled]="uploading"
-               (input)="updateCanAddLink()">
+      <div class="p-field">
+        <label>Fichier</label>
+        <p-fileUpload mode="basic" chooseLabel="Sélectionner un fichier" (onSelect)="onFileSelect($event)" 
+                      [auto]="true" [customUpload]="true" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png">
+        </p-fileUpload>
       </div>
+      <p-message *ngIf="error" severity="error" [text]="errorMessage"></p-message>
     </div>
     <ng-template pTemplate="footer">
-      <button pButton pRipple type="button" label="Annuler" 
-              class="p-button-text" 
-              (click)="closeExternalLinkDialog()" 
-              [disabled]="uploading"></button>
-      <button pButton pRipple type="button" label="Ajouter" 
-              class="p-button-primary" 
-              (click)="addExternalLink()" 
-              [disabled]="!canAddLink || uploading"
-              [loading]="uploading"></button>
+      <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="closeUploadDialog(true)"></button>
+      <button pButton pRipple label="Téléverser" icon="pi pi-upload" [disabled]="!canUpload || uploading" 
+              [loading]="uploading" (click)="uploadDocument(true)"></button>
     </ng-template>
   </p-dialog>
 </div>

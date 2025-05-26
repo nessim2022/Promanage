@@ -7,7 +7,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
-import { DocumentListComponent } from '../document-list/document-list.component';
+import { DocumentListComponent } from '../documents/document-list/document-list.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
