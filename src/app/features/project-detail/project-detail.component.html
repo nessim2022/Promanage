@@ -9,8 +9,8 @@
       <h1>Détails du Projet</h1>
       <p class="subtitle" *ngIf="!loading && !errorMessage">{{ project.name }}</p>
     </div>
-    <div class="header-right" *ngIf="!loading && !errorMessage">
-      <button pButton pRipple type="button" icon="pi pi-arrow-left" label="Retour" class="p-button-outlined" routerLink="/dashboard"></button>
+    <div class="header-right">
+      <button pButton pRipple type="button" icon="pi pi-arrow-left" label="Retour" class="p-button-outlined p-button-label" routerLink="/dashboard"></button>
     </div>
   </div>
   
@@ -96,7 +96,7 @@
           </div>
           
           <!-- Champ URL GitLab -->
-          <div class="form-group gitlab-url-container">
+          <!-- <div class="form-group gitlab-url-container">
             <label for="gitlabUrl">URL GitLab</label>
             <div class="p-inputgroup">
               <input id="gitlabUrl" type="text" pInputText [(ngModel)]="project.gitlabURL" class="form-control" />
@@ -104,7 +104,7 @@
                      [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
                      (click)="openGitLabUrl()" class="p-button-success"></button>
             </div>
-          </div>
+          </div> -->
           
           <div class="form-actions">
             <button pButton pRipple type="button" label="Enregistrer" icon="pi pi-save" 
@@ -120,13 +120,7 @@
         <div class="tab-content">
           <div *ngIf="project && project.projectId > 0; else noProjectDocs">
   <p-card>
-    <button pButton pRipple type="button"
-            icon="pi pi-file"
-            class="p-button-icon p-button-rounded p-button-info"
-            pTooltip="Voir les documents"
-            (click)="loadDocuments()"
-            style="margin-bottom: 1rem; float: right;">
-    </button>
+   
     <app-document-list [projectId]="project.projectId"></app-document-list>
   </p-card>
 </div>
@@ -153,7 +147,15 @@
       <p-tabPanel header="GitLab">
         <div class="tab-content">
           <div *ngIf="project && project.projectId > 0; else noProjectId">
-            <app-gitlab-integration [projectId]="project.projectId" [gitlabUrl]="project.gitlabURL"></app-gitlab-integration>
+            <div class="form-group gitlab-url-container">
+              <label for="gitlabUrl">URL GitLab</label>
+              <div class="p-inputgroup">
+                <input id="gitlabUrl" type="text" pInputText [(ngModel)]="project.gitlabURL" class="form-control" />
+                <button pButton pRipple type="button" icon="pi pi-gitlab" label="Accéder" 
+                       [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
+                       (click)="openGitLabUrl()" class="p-button-success"></button>
+              </div>
+            </div>
           </div>
           <ng-template #noProjectId>
             <div class="loading-placeholder">
@@ -167,7 +169,19 @@
                   <p>Impossible de charger les informations GitLab. Veuillez réessayer plus tard.</p>
                   <button pButton pRipple type="button" label="Réessayer" 
                           icon="pi pi-refresh" (click)="loadProject()"></button>
+                           <button pButton pRipple type="button" icon="pi pi-gitlab" label="Accéder" 
+                     [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
+                     (click)="openGitLabUrl()" class="p-button-success"></button>
                 </div>
+                 <div class="form-group gitlab-url-container">
+            <label for="gitlabUrl">URL GitLab</label>
+            <div class="p-inputgroup">
+              <input id="gitlabUrl" type="text" pInputText [(ngModel)]="project.gitlabURL" class="form-control" />
+              <button pButton pRipple type="button" icon="pi pi-gitlab" label="Accéder" 
+                     [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
+                     (click)="openGitLabUrl()" class="p-button-success"></button>
+            </div>
+          </div>
               </p-card>
             </div>
           </ng-template>

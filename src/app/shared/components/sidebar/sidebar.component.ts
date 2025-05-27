@@ -29,7 +29,7 @@ export class SidebarComponent implements OnInit {
   menuItems: MenuItem[] = [
     { label: 'Tableau de bord', icon: 'pi pi-home', route: '/dashboard', requiresAuth: true },
     { label: 'Projets', icon: 'pi pi-folder', route: '/projects', requiresAuth: true, badge: 3 },
-    { label: 'Documents', icon: 'pi pi-file', route: '/documents', requiresAuth: true },
+    
     { label: 'Tous les documents', icon: 'pi pi-copy', route: '/all-documents', requiresAuth: true },
     { label: 'GitLab', icon: 'pi pi-code', route: '/gitlab', requiresAuth: true },
     { label: 'Notifications', icon: 'pi pi-bell', route: '/notifications', requiresAuth: true, badge: 5 },
@@ -41,7 +41,7 @@ export class SidebarComponent implements OnInit {
     this.currentRoute = this.router.url;
     this.user=localStorage.getItem('auth_user');
     this.user=JSON.parse(this.user);
-    this.user=this.user.email;
+    this.user=this.user.roles[0].authority;
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
