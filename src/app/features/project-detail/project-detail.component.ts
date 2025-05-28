@@ -23,6 +23,7 @@ import { ProjectMembersComponent } from '../project-members/project-members.comp
 import { GitlabMembersComponent } from '../gitlab-members/gitlab-members.component';
 import { DocumentService } from '../../core/services/document.service';
 import type { Document } from '../../shared/models/document';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-project-detail',
@@ -82,7 +83,8 @@ export class ProjectDetailComponent implements OnInit {
     private projectService: ProjectService,
     private documentService: DocumentService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit() {
@@ -94,7 +96,12 @@ export class ProjectDetailComponent implements OnInit {
     if (!this.project.projectId) return;
     this.loadingDocuments = true;
     this.errorDocuments = false;
-    this.documentService.getDocumentsByProject(this.project.projectId)
+    
+    // Vérifier si l'utilisateur est un super admin
+    const isSuperAdmin = this.authService.isSuperAdmin();
+    console.log('Chargement des documents en tant que super admin:', isSuperAdmin);
+    
+    this.documentService.getDocumentsByProject(this.project.projectId, isSuperAdmin)
       .subscribe({
         next: (docs: Document[]) => {
           this.documents = docs;
