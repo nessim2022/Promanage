@@ -37,9 +37,10 @@
         <td>{{ project.startDate | date:'dd/MM/yyyy' }}</td>
         <td>{{ project.endDate | date:'dd/MM/yyyy' }}</td>
         <td class="action-buttons">
-          <p-button icon="pi pi-folder-open" (click)="onSelectProject(project.projectId)" styleClass="p-button-rounded p-button-success p-button-sm" pTooltip="Voir les documents du projet"></p-button>
+          <p-button icon="pi pi-pencil" [routerLink]="['/projects', project.projectId, 'edit']" styleClass="p-button-rounded p-button-warning p-button-sm" pTooltip="Mettre à jour" *ngIf="isAdmin"></p-button>
           <p-button icon="pi pi-info-circle" [routerLink]="['/projects', project.projectId]" styleClass="p-button-rounded p-button-info p-button-sm" pTooltip="Voir les détails du projet"></p-button>
           <p-button *ngIf="isAdmin" icon="pi pi-trash" (click)="deleteProject(project.projectId)" styleClass="p-button-rounded p-button-danger p-button-sm" pTooltip="Supprimer le projet"></p-button>
+
         </td>
       </tr>
     </ng-template>
@@ -51,13 +52,3 @@
   </p-table>
 </p-card>
 
-<div *ngIf="selectedProjectId" class="selected-project-documents">
-  <h3><i class="pi pi-folder-open"></i> Documents du projet sélectionné</h3>
-  <div class="document-container">
-    <app-document-list [projectId]="selectedProjectId"></app-document-list>
-  </div>
-  <div class="back-button-container">
-    <button pButton pRipple type="button" icon="pi pi-arrow-left" label="Retour à la liste des projets" 
-            class="p-button-outlined p-button-secondary" (click)="selectedProjectId = undefined"></button>
-  </div>
-</div>

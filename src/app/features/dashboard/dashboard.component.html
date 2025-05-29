@@ -100,7 +100,6 @@
         <ng-template pTemplate="header">
           <div class="card-header">
             <h2>Mes Projets</h2>
-            <p-button label="Nouveau projet" icon="pi pi-plus" routerLink="/projects" styleClass="p-button-sm"></p-button>
           </div>
         </ng-template>
         
@@ -149,7 +148,7 @@
                           pTooltip="Voir les documents" tooltipPosition="top"
                           (click)="viewDocuments(project.projectId)"></button>
                   <button *ngIf="isSuperAdmin" pButton type="button" icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-sm"
-                          pTooltip="Modifier" tooltipPosition="top"
+                          pTooltip="<b>UPDATE</b>" tooltipPosition="top" escape="false"
                           [routerLink]="['/projects', project.projectId, 'edit']"></button>
                 </div>
               </td>
