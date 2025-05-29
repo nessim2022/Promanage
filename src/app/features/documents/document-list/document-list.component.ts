@@ -86,7 +86,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
       
       // Filtrer les documents par projets auxquels l'utilisateur a accès
       return filteredDocs.filter(doc => {
-        // Vérifier si le document appartient à un projet de l'utilisateur
+        // Vérifier si le document appartient à un projet de l'utilisate
         const hasProjectAccess = userProjectIds.includes(String(doc.projectId));
         
         // Si le document a un champ createdBy, on pourrait aussi vérifier si l'utilisateur est le créateur

@@ -5,6 +5,10 @@
     {{ isAdmin ? 'Tous les projets' : 'Mes projets' }} 
     <span class="badge">{{ projects.length }}</span>
   </h2>
+  <div class="header-actions" *ngIf="isAdmin">
+    <button pButton pRipple type="button" label="Nouveau projet" icon="pi pi-plus" 
+            class="p-button-success" [routerLink]="['/projects/new']"></button>
+  </div>
   <hr />
 </div>
 

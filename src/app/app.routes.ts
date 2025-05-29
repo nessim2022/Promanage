@@ -9,6 +9,7 @@ import { DocumentListComponent } from './features/documents/document-list/docume
 import { GitlabIntegrationComponent } from './features/gitlab-integration/gitlab-integration.component';
 import { NotificationListComponent } from './features/notification-list/notification-list.component';
 import { AllDocumentsComponent } from './features/all-documents/all-documents.component';
+import { ProjectFormComponent } from './features/project-form/project-form.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -16,6 +17,7 @@ export const routes: Routes = [
   { path: 'register', component: RegisterComponent },
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'projects', component: ProjectListComponent, canActivate: [authGuard] },
+  { path: 'projects/new', component: ProjectFormComponent, canActivate: [authGuard] },
   { path: 'projects/:id', component: ProjectDetailComponent, canActivate: [authGuard] },
   { path: 'gitlab', component: GitlabIntegrationComponent, canActivate: [authGuard] },
   { path: 'documents', component: DocumentListComponent },
