@@ -1,0 +1,127 @@
+<div class="project-form-container">
+    <p-toast></p-toast>
+  
+    <p-card>
+      <ng-template pTemplate="header">
+        <div class="form-header">
+          <h2>Modifier le projet</h2>
+        </div>
+      </ng-template>
+  
+      <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label for="name">Nom du projet *</label>
+          <input 
+            id="name" 
+            type="text" 
+            pInputText 
+            formControlName="name" 
+            value="{{ project.name }}"
+            [ngClass]="{'ng-invalid ng-dirty': submitted && projectForm.controls['name'].invalid}"
+            placeholder="Entrez le nom du projet"
+          />
+          <small *ngIf="submitted && projectForm.controls['name'].errors?.['required']" class="p-error">
+            Le nom du projet est requis.
+          </small>
+          <small *ngIf="submitted && projectForm.controls['name'].errors?.['minlength']" class="p-error">
+            Le nom du projet doit contenir au moins 3 caractères.
+          </small>
+        </div>
+  
+        <div class="form-group">
+          <label for="description">Description *</label>
+          <textarea 
+            id="description" 
+            pInputTextarea 
+            formControlName="description" 
+            value="{{ project.description }}"
+            [ngClass]="{'ng-invalid ng-dirty': submitted && projectForm.controls['description'].invalid}"
+            placeholder="Décrivez le projet"
+            rows="4"
+          ></textarea>
+          <small *ngIf="submitted && projectForm.controls['description'].errors?.['required']" class="p-error">
+            La description est requise.
+          </small>
+        </div>
+  
+        <div class="form-group">
+          <label for="gitlabURL">URL GitLab *</label>
+          <input 
+            id="gitlabURL" 
+            type="text" 
+            pInputText 
+            value="{{ project.gitlabURL }}"
+            formControlName="gitlabURL" 
+            [ngClass]="{'ng-invalid ng-dirty': submitted && projectForm.controls['gitlabURL'].invalid}"
+            placeholder="https://gitlab.com/votre-projet"
+          />
+          <small *ngIf="submitted && projectForm.controls['gitlabURL'].errors?.['required']" class="p-error">
+            L'URL GitLab est requise.
+          </small>
+          <small *ngIf="submitted && projectForm.controls['gitlabURL'].errors?.['pattern']" class="p-error">
+            L'URL GitLab doit être au format https://gitlab.com/...
+          </small>
+        </div>
+  
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startDate">Date de début *</label>
+            <p-calendar 
+              id="startDate" 
+              
+              formControlName="startDate" 
+              [showIcon]="true"
+              dateFormat="dd/mm/yy"
+              [minDate]="today"
+              (onSelect)="validateDates()"
+              [ngClass]="{'ng-invalid ng-dirty': submitted && projectForm.controls['startDate'].invalid}"
+            ></p-calendar>
+            <small *ngIf="submitted && projectForm.controls['startDate'].errors?.['required']" class="p-error">
+              La date de début est requise.
+            </small>
+          </div>
+  
+          <div class="form-group">
+            <label for="endDate">Date de fin *</label>
+            <p-calendar 
+              id="endDate" 
+              formControlName="endDate" 
+              [showIcon]="true"
+              dateFormat="dd/mm/yy"
+              [minDate]="projectForm.value.startDate || today"
+              (onSelect)="validateDates()"
+              [ngClass]="{'ng-invalid ng-dirty': submitted && projectForm.controls['endDate'].invalid}"
+            ></p-calendar>
+            <small *ngIf="submitted && projectForm.controls['endDate'].errors?.['required']" class="p-error">
+              La date de fin est requise.
+            </small>
+            <small *ngIf="submitted && projectForm.controls['endDate'].errors?.['invalidEndDate']" class="p-error">
+              La date de fin doit être postérieure à la date de début.
+            </small>
+          </div>
+        </div>
+  
+        <div class="form-actions">
+          <button 
+            pButton 
+            type="button" 
+            label="Annuler" 
+            class="p-button-outlined p-button-secondary" 
+            [routerLink]="['/projects']"
+          ></button>
+          <button 
+            pButton 
+            type="submit" 
+            label="Mettre à jour le projet" 
+            [disabled]="loading"
+            [loading]="loading"
+          ></button>
+        </div>
+      </form>
+  
+      <div *ngIf="loading" class="loading-overlay">
+        <p-progressSpinner></p-progressSpinner>
+      </div>
+    </p-card>
+  </div>
+  

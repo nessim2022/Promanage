@@ -37,7 +37,7 @@
         <td>{{ project.startDate | date:'dd/MM/yyyy' }}</td>
         <td>{{ project.endDate | date:'dd/MM/yyyy' }}</td>
         <td class="action-buttons">
-          <p-button icon="pi pi-pencil" [routerLink]="['/projects', project.projectId, 'edit']" styleClass="p-button-rounded p-button-warning p-button-sm" pTooltip="Mettre à jour" *ngIf="isAdmin"></p-button>
+          <p-button icon="pi pi-pencil" [routerLink]="['/projects/edit',project.projectId]" styleClass="p-button-rounded p-button-warning p-button-sm" pTooltip="Mettre à jour" *ngIf="isAdmin"></p-button>
           <p-button icon="pi pi-info-circle" [routerLink]="['/projects', project.projectId]" styleClass="p-button-rounded p-button-info p-button-sm" pTooltip="Voir les détails du projet"></p-button>
           <p-button *ngIf="isAdmin" icon="pi pi-trash" (click)="deleteProject(project.projectId)" styleClass="p-button-rounded p-button-danger p-button-sm" pTooltip="Supprimer le projet"></p-button>
 
