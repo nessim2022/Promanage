@@ -12,6 +12,7 @@ interface MenuItem {
   route: string;
   requiresAuth: boolean;
   badge?: number;
+  roles?: string[];
 }
 
 @Component({
@@ -32,22 +33,35 @@ export class SidebarComponent implements OnInit {
     
     { label: 'Tous les documents', icon: 'pi pi-copy', route: '/all-documents', requiresAuth: true },
     { label: 'GitLab', icon: 'pi pi-code', route: '/gitlab', requiresAuth: true },
-    { label: 'Notifications', icon: 'pi pi-bell', route: '/notifications', requiresAuth: true, badge: 5 },
+    { label: 'Notifications', icon: 'pi pi-bell', route: '/notifications', requiresAuth: true, badge: 5, roles: ['superAdmin'] },
   ];
-
+  userRoles: string[] = [];
+  visibleMenuItems: MenuItem[] = [];
   constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.currentRoute = this.router.url;
-    this.user=localStorage.getItem('auth_user');
-    this.user=JSON.parse(this.user);
-    this.user=this.user.roles[0].authority;
+  
+    const userData = localStorage.getItem('auth_user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      this.userRoles = parsedUser.roles.map((role: any) => role.authority);
+    }
+  
+    this.visibleMenuItems = this.menuItems.filter(item => {
+      if (!item.requiresAuth) return true;
+      if (!this.isLoggedIn()) return false;
+      if (!item.roles) return true;
+      return item.roles.some(role => this.userRoles.includes(role));
+    });
+  
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       this.currentRoute = event.url;
     });
   }
+  
 
   isRouteActive(route: string): boolean {
     if (route === '/projects' && this.currentRoute.startsWith('/projects/')) {

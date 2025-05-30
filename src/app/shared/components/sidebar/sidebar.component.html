@@ -1,7 +1,7 @@
 <div class="sidebar" [class.collapsed]="collapsed">
   <div class="sidebar-header">
     <div class="logo-container">
-      <h5 class="app-name" *ngIf="!collapsed">{{user}}</h5>
+      <h5 class="app-name" *ngIf="!collapsed">{{userRoles}}</h5>
     </div>
     <button class="toggle-btn" (click)="toggle()">
       <i class="pi" [ngClass]="collapsed ? 'pi-angle-right' : 'pi-angle-left'"></i>
@@ -9,7 +9,7 @@
   </div>
   
   <div class="menu">
-    <ng-container *ngFor="let item of menuItems">
+    <ng-container *ngFor="let item of visibleMenuItems">
       <a 
         *ngIf="!item.requiresAuth || isLoggedIn()"
         [routerLink]="item.route" 
