@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { catchError, finalize, of } from 'rxjs';
 import { ProjectDTO } from '../../shared/models/project';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -35,7 +35,7 @@ import type { Document } from '../../shared/models/document';
   templateUrl: './edit-project-form.component.html',
   styleUrl: './edit-project-form.component.scss'
 })
-export class EditProjectFormComponent {
+export class EditProjectFormComponent implements OnInit {
   projectForm!: FormGroup;
   loading = false;
   submitted = false;
@@ -51,9 +51,6 @@ export class EditProjectFormComponent {
     progressStateId: 1,
     userIds: []
   };
-
-  startDateValue: Date | null = this.project.startDate ? new Date(this.project.startDate) : null ;
-  endDateValue: Date | null = this.project.endDate ? new Date(this.project.endDate) : null;
 
   documents: Document[] = [];
   loadingDocuments = false;
@@ -84,11 +81,15 @@ export class EditProjectFormComponent {
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: ['', Validators.required],
       gitlabURL: ['', [Validators.required, Validators.pattern('https://gitlab\\.com/.*')]],
-      startDate: [new Date(), Validators.required],
-      endDate: [new Date(new Date().setMonth(new Date().getMonth() + 3)), Validators.required],
-      progressStateId: [1], // État par défaut (à définir selon votre logique métier)
-      userIds: [[]] // Liste vide par défaut
+      startDate: [null, Validators.required], // Initialize as null for p-calendar
+      endDate: [null, Validators.required], // Initialize as null for p-calendar
+      progressStateId: [1],
+      userIds: [[]]
     });
+
+    // Subscribe to date changes to validate dynamically
+    this.projectForm.get('startDate')?.valueChanges.subscribe(() => this.validateDates());
+    this.projectForm.get('endDate')?.valueChanges.subscribe(() => this.validateDates());
   }
 
   loadProject() {
@@ -113,10 +114,23 @@ export class EditProjectFormComponent {
       .subscribe(project => {
         if (project) {
           this.project = project;
-          this.startDateValue = project.startDate ? new Date(project.startDate) : null;
-          this.endDateValue = project.endDate ? new Date(project.endDate) : null;
+          // Convert string dates to Date objects for p-calendar
+          const startDate = project.startDate ? new Date(project.startDate) : null;
+          const endDate = project.endDate ? new Date(project.endDate) : null;
+          
+          // Patch form with project data
+          this.projectForm.patchValue({
+            name: project.name,
+            description: project.description,
+            gitlabURL: project.gitlabURL,
+            startDate: startDate,
+            endDate: endDate,
+            progressStateId: project.progressStateId,
+            userIds: project.userIds
+          });
+          
           this.loadProjectProgress();
-          this.loadDocuments(); // Charger les documents dès que le projet est chargé
+          this.loadDocuments();
         }
       });
   }
@@ -140,11 +154,10 @@ export class EditProjectFormComponent {
     if (!this.project.projectId) return;
     this.loadingDocuments = true;
     this.errorDocuments = false;
-    
-    // Vérifier si l'utilisateur est un super admin
+
     const isSuperAdmin = this.authService.isSuperAdmin();
     console.log('Chargement des documents en tant que super admin:', isSuperAdmin);
-    
+
     this.documentService.getDocumentsByProject(this.project.projectId, isSuperAdmin)
       .subscribe({
         next: (docs: Document[]) => {
@@ -158,7 +171,6 @@ export class EditProjectFormComponent {
       });
   }
 
-
   onSubmit() {
     this.submitted = true;
 
@@ -171,13 +183,23 @@ export class EditProjectFormComponent {
       return;
     }
 
+    this.validateDates();
+    if (this.projectForm.get('endDate')?.errors?.['invalidEndDate']) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur de date',
+        detail: 'La date de fin doit être postérieure à la date de début.'
+      });
+      return;
+    }
+
     this.loading = true;
 
-    // Formatage des dates pour l'API
+    // Format form data for the API
     const formValue = this.projectForm.value;
     const projectData: ProjectDTO = {
       ...formValue,
-      projectId: 0, // Sera généré par le backend
+      projectId: this.project.projectId,
       startDate: this.formatDate(formValue.startDate),
       endDate: this.formatDate(formValue.endDate),
       userIds: formValue.userIds || []
@@ -185,33 +207,34 @@ export class EditProjectFormComponent {
 
     const userEmail = this.authService.getUserEmail() || '';
 
-    this.projectService.createProject(projectData, userEmail).pipe(
-      catchError(error => {
-        console.error('Erreur lors de la création du projet:', error);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erreur',
-          detail: error.error || 'Impossible de créer le projet. Veuillez réessayer.'
-        });
-        return of(null);
-      }),
-      finalize(() => {
-        this.loading = false;
-      })
-    ).subscribe(result => {
-      if (result) {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Succès',
-          detail: 'Projet créé avec succès!'
-        });
-        this.router.navigate(['/projects']);
-      }
-    });
+    this.projectService.updateProject(this.project.projectId, projectData, userEmail)
+      .pipe(
+        catchError(error => {
+          console.error('Erreur lors de la mise à jour du projet:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: error.error || 'Impossible de mettre à jour le projet. Veuillez réessayer.'
+          });
+          return of(null);
+        }),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe(result => {
+        if (result) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Projet mis à jour avec succès!'
+          });
+          this.router.navigate(['/projects']);
+        }
+      });
   }
 
-  // Formater la date au format YYYY-MM-DD
-  private formatDate(date: Date): string {
+  private formatDate(date: Date | null): string {
     if (!date) return '';
     const d = new Date(date);
     let month = '' + (d.getMonth() + 1);
@@ -224,13 +247,14 @@ export class EditProjectFormComponent {
     return [year, month, day].join('-');
   }
 
-  // Validation personnalisée pour s'assurer que la date de fin est après la date de début
   validateDates() {
     const startDate = this.projectForm.get('startDate')?.value;
     const endDate = this.projectForm.get('endDate')?.value;
 
     if (startDate && endDate && new Date(endDate) <= new Date(startDate)) {
       this.projectForm.get('endDate')?.setErrors({ invalidEndDate: true });
+    } else {
+      this.projectForm.get('endDate')?.setErrors(null);
     }
   }
 }
