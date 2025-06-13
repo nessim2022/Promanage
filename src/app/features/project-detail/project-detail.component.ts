@@ -256,6 +256,7 @@ export class ProjectDetailComponent implements OnInit {
     return date.toISOString().split('T')[0];
   }
 
+  // Méthode pour ouvrir l'URL GitLab dans un nouvel onglet
   openGitLabUrl() {
     if (this.project && this.project.gitlabURL && this.project.gitlabURL.trim().length > 0) {
       // Assurez-vous que l'URL commence par http:// ou https://

@@ -137,18 +137,12 @@ export class UserService {
   
   // Ajouter un utilisateur à un projet
   addUserToProject(projectId: number, userId: number, role: string): Observable<any> {
-    // Format de données selon votre API
-    const data = { 
-      userId: userId,
-      role: role
-    };
-    
     console.log(`Tentative d'ajout de l'utilisateur ${userId} au projet ${projectId} avec le rôle ${role}`);
-    console.log(`URL d'API utilisée: ${this.apiUrl}/projects/${projectId}/users`);
     
-    // Utilisation de withCredentials pour s'assurer que les cookies sont envoyés
-    // et augmentation du timeout pour éviter les erreurs de délai d'attente
-    return this.http.post(`${this.apiUrl}/projects/${projectId}/users`, data, { 
+    const data = { userId, role };
+    
+    // Modification du chemin d'API pour correspondre à la structure attendue par le backend
+    return this.http.post(`${this.apiUrl}/${projectId}/members`, data, { 
       headers: this.getHeaders(),
       withCredentials: true,
       observe: 'response'
@@ -191,9 +185,9 @@ export class UserService {
   // Retirer un utilisateur d'un projet
   removeUserFromProject(projectId: number, userId: number): Observable<any> {
     console.log(`Tentative de suppression de l'utilisateur ${userId} du projet ${projectId}`);
-    console.log(`URL d'API utilisée: ${this.apiUrl}/projects/${projectId}/users/${userId}`);
+    console.log(`URL d'API utilisée: ${this.apiUrl}/${projectId}/members/${userId}`);
     
-    return this.http.delete(`${this.apiUrl}/projects/${projectId}/users/${userId}`, { 
+    return this.http.delete(`${this.apiUrl}/${projectId}/members/${userId}`, { 
       headers: this.getHeaders(),
       withCredentials: true,
       observe: 'response'

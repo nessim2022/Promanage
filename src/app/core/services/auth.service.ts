@@ -61,15 +61,14 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     this.isAuthenticated.next(false);
 
-    const loginUrl = `${environment.backendUrl}/auth/login`;
+    const loginUrl = '/auth/login';
     console.log(`Tentative de connexion avec l'URL: ${loginUrl}`);
     
     const httpOptions = {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
-      },
-      withCredentials: true
+      }
     };
     
     return this.http.post<AuthResponse>(loginUrl, credentials, httpOptions).pipe(
@@ -79,18 +78,24 @@ export class AuthService {
         if (token) {
           console.log('Token trouvé et stocké:', token);
           localStorage.setItem(this.TOKEN_KEY, token);
-          const decoded: any = jwtDecode(token);
-          console.log('Payload du token:', decoded);
-          const user = {
-            email: decoded.sub,
-            roles: decoded.roles || decoded.authorities || []
-          };
-          console.log('Utilisateur stocké:', user);
-          if (!user.roles.includes('ROLE_USER')) {
-            console.warn('ROLE_USER manquant dans le token');
+          try {
+            const decoded: any = jwtDecode(token);
+            console.log('Payload du token:', decoded);
+            const user = {
+              email: decoded.sub,
+              roles: decoded.roles || decoded.authorities || []
+            };
+            console.log('Utilisateur stocké:', user);
+            localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+            this.isAuthenticated.next(true);
+          } catch (error) {
+            console.error('Erreur lors du décodage du token:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erreur de connexion',
+              detail: 'Token invalide reçu du serveur.'
+            });
           }
-          localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-          this.isAuthenticated.next(true);
         } else {
           console.error('Aucun token trouvé dans la réponse:', response);
           this.messageService.add({
@@ -100,7 +105,36 @@ export class AuthService {
           });
         }
       }),
-      catchError(this.handleError('Connexion', credentials))
+      catchError((error: HttpErrorResponse) => {
+        console.error('Erreur lors de l\'opération Connexion:', error);
+        console.error('Détails de la requête:', {
+          operation: 'Connexion',
+          data: credentials,
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          error: error.error
+        });
+        
+        let errorMessage = 'Une erreur est survenue lors de la connexion.';
+        if (error.status === 403) {
+          errorMessage = 'Accès refusé. Vérifiez vos identifiants.';
+        } else if (error.status === 401) {
+          errorMessage = 'Identifiants invalides.';
+        }
+        
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur de connexion',
+          detail: errorMessage
+        });
+        
+        return throwError(() => ({
+          status: error.status,
+          message: errorMessage,
+          originalError: error
+        }));
+      })
     );
   }
 

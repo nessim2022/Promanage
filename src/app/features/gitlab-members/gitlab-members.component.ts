@@ -11,7 +11,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -375,25 +375,51 @@ export class GitlabMembersComponent implements OnInit {
 
   loadMembers() {
     if (!this.projectId && !this.gitlabUrl) {
+      console.error('Aucun ID de projet ou URL GitLab fourni');
       this.error = true;
-      this.errorMessage = 'Aucun projet GitLab spécifié.';
+      this.errorMessage = 'Aucun ID de projet ou URL GitLab fourni';
+      this.loading = false;
       return;
     }
     
     this.loading = true;
     this.error = false;
     
+    // Afficher les valeurs reçues
+    console.log('Valeurs reçues - projectId:', this.projectId, 'gitlabUrl:', this.gitlabUrl);
+    
     // Utiliser l'URL ou l'ID du projet pour récupérer les membres
     const url = this.gitlabUrl ? 
-      `/api/gitlab/validate-gitlab-url?url=${encodeURIComponent(this.gitlabUrl)}` : 
-      `/api/gitlab/get-project-members?projectId=${this.projectId}`;
+      `/api/gitlab/validate-gitlab-url` : 
+      `/api/gitlab/get-project-members`;
     
-    this.http.get<GitLabMember[]>(url)
+    // Créer un objet HttpParams pour les paramètres
+    let httpParams = new HttpParams();
+    
+    if (this.gitlabUrl) {
+      httpParams = httpParams.set('url', this.gitlabUrl);
+    } else if (this.projectId) {
+      httpParams = httpParams.set('projectId', this.projectId.toString());
+    }
+    
+    console.log('Chargement des membres GitLab avec URL:', url, 'et paramètres:', httpParams.toString());
+    
+    // Ajouter des en-têtes d'authentification
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    
+    this.http.get<GitLabMember[]>(url, {
+      params: httpParams,
+      headers,
+      withCredentials: true // Ajouter cette option pour inclure les cookies dans la requête
+    })
       .pipe(
         catchError(error => {
           console.error('Erreur lors du chargement des membres GitLab:', error);
           this.error = true;
-          this.errorMessage = 'Impossible de charger les membres GitLab. Veuillez vérifier l\'URL du projet et réessayer.';
+          this.errorMessage = `Impossible de charger les membres GitLab. Erreur: ${error.status} ${error.statusText}. ${error.message || ''}`;
           return of([]);
         }),
         finalize(() => {
@@ -401,7 +427,16 @@ export class GitlabMembersComponent implements OnInit {
         })
       )
       .subscribe(members => {
-        this.members = members;
+        console.log('Réponse brute:', members);
+        if (members && Array.isArray(members)) {
+          this.members = members;
+          console.log('Membres GitLab chargés:', this.members);
+        } else {
+          console.error('La réponse n\'est pas un tableau:', members);
+          this.members = [];
+          this.error = true;
+          this.errorMessage = 'Format de réponse invalide. Veuillez contacter l\'administrateur.';
+        }
       });
   }
 

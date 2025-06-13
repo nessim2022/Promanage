@@ -169,19 +169,16 @@
                   <p>Impossible de charger les informations GitLab. Veuillez réessayer plus tard.</p>
                   <button pButton pRipple type="button" label="Réessayer" 
                           icon="pi pi-refresh" (click)="loadProject()"></button>
-                           <button pButton pRipple type="button" icon="pi pi-gitlab" label="Accéder" 
-                     [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
-                     (click)="openGitLabUrl()" class="p-button-success"></button>
                 </div>
-                 <div class="form-group gitlab-url-container">
-            <label for="gitlabUrl">URL GitLab</label>
-            <div class="p-inputgroup">
-              <input id="gitlabUrl" type="text" pInputText [(ngModel)]="project.gitlabURL" class="form-control" />
-              <button pButton pRipple type="button" icon="pi pi-gitlab" label="Accéder" 
-                     [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
-                     (click)="openGitLabUrl()" class="p-button-success"></button>
-            </div>
-          </div>
+                <div class="form-group gitlab-url-container">
+                  <label for="gitlabUrl">URL GitLab</label>
+                  <div class="p-inputgroup">
+                    <input id="gitlabUrl" type="text" pInputText [(ngModel)]="project.gitlabURL" class="form-control" />
+                    <button pButton pRipple type="button" icon="pi pi-gitlab" label="Accéder" 
+                          [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
+                          (click)="openGitLabUrl()" class="p-button-success"></button>
+                  </div>
+                </div>
               </p-card>
             </div>
           </ng-template>

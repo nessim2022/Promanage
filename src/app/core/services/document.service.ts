@@ -122,58 +122,7 @@ export class DocumentService {
     );
   }
 
-  // uploadDocument(projectId: number, file: File, title: string): Observable<any> {
-  //   if (projectId <= 0) {
-  //     this.messageService.add({
-  //       severity: 'error',
-  //       summary: 'Erreur',
-  //       detail: 'Aucun projet sélectionné. Veuillez spécifier un projet.'
-  //     });
-  //     return throwError(() => new Error('Aucun projet sélectionné'));
-  //   }
-
-  //   const formData = new FormData();
-  //   formData.append('file', file);
-  //   formData.append('projectId', projectId.toString());
-  //   formData.append('title', title);
-    
-  //   // Utilisation de l'endpoint correct pour l'upload de documents
-  //   const uploadUrl = `${this.apiUrl}/documents/upload`;
-  //   // const uploadUrl = `${this.apiUrl}/alfresco2/upload/${projectId}?title=${title}`;
-  //   console.log(`Tentative de téléversement vers: ${uploadUrl}`);
-    
-  //   return this.checkAlfrescoAvailability().pipe(
-  //     switchMap(isAvailable => {
-  //       if (!isAvailable) {
-  //         this.messageService.add({
-  //           severity: 'error',
-  //           summary: 'Erreur de connexion',
-  //           detail: 'Le serveur de documents est actuellement indisponible. Veuillez réessayer plus tard.'
-  //         });
-  //         return throwError(() => new Error('Le serveur de documents est indisponible'));
-  //       }
-        
-  //       return this.http.post(uploadUrl, formData, { 
-  //         headers: this.getHeaders(),
-  //         withCredentials: true
-  //       }).pipe(
-  //         timeout(30000),
-  //         tap(response => {
-  //           console.log('Document téléversé avec succès:', response);
-  //           this.messageService.add({
-  //             severity: 'success',
-  //             summary: 'Téléversement réussi',
-  //             detail: 'Le document a été téléversé avec succès.'
-  //           });
-  //         }),
-  //         catchError(error => {
-  //           console.error('Erreur lors du téléversement:', error);
-  //           return this.handleSessionExpired(error);
-  //         })
-  //       );
-  //     })
-  //   );
-  // }
+ 
 
   uploadDocument(projectId: number, file: File, title: string): Observable<any> {
     console.log("calling the upload doc")

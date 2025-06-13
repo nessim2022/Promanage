@@ -7,9 +7,10 @@ import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { GitlabService } from '../../core/services/gitlab.service';
 
 @Component({
   selector: 'app-gitlab-integration',
@@ -101,30 +102,72 @@ export class GitlabIntegrationComponent implements OnInit {
   errorMessage: string = '';
   successMessage: string = '';
 
-  constructor(private messageService: MessageService) {}
+  constructor(
+    private messageService: MessageService,
+    private gitlabService: GitlabService,
+    private http: HttpClient
+  ) {}
 
   ngOnInit() {
     // Initialisation du composant
   }
 
   validateUrl() {
-    if (!this.gitlabUrl) return;
+    if (!this.gitlabUrl) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Veuillez entrer une URL GitLab valide'
+      });
+      return;
+    }
     
     this.loading = true;
     this.error = false;
     this.success = false;
     
-    // Simulation d'une validation réussie
-    setTimeout(() => {
-      this.loading = false;
-      this.success = true;
-      this.successMessage = 'URL GitLab validée avec succès';
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Succès',
-        detail: 'URL GitLab validée avec succès'
+    console.log('Tentative de validation de l\'URL GitLab:', this.gitlabUrl);
+    
+    this.gitlabService.validateGitlabUrl(this.gitlabUrl)
+      .pipe(
+        catchError(error => {
+          console.error('Erreur lors de la validation de l\'URL GitLab:', error);
+          console.error('Détails de l\'erreur:', error.status, error.statusText, error.message);
+          this.error = true;
+          this.errorMessage = `Impossible de valider l'URL GitLab: ${error.status === 0 ? 'Problème de connexion au serveur' : error.message || 'Erreur inconnue'}. Veuillez vérifier l'URL et réessayer.`;
+          
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: this.errorMessage
+          });
+          
+          return of([]);
+        }),
+        finalize(() => {
+          this.loading = false;
+        })
+      )
+      .subscribe(members => {
+        console.log('Résultat de la validation:', members);
+        if (members && Array.isArray(members) && members.length > 0) {
+          this.success = true;
+          this.successMessage = 'URL GitLab validée avec succès';
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'URL GitLab validée avec succès'
+          });
+        } else {
+          this.error = true;
+          this.errorMessage = 'Aucun membre trouvé pour ce projet GitLab. Veuillez vérifier l\'URL et vos permissions.';
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Attention',
+            detail: this.errorMessage
+          });
+        }
       });
-    }, 1000);
   }
 
   syncProject() {
@@ -134,16 +177,31 @@ export class GitlabIntegrationComponent implements OnInit {
     this.error = false;
     this.success = false;
     
-    // Simulation d'une synchronisation réussie
-    setTimeout(() => {
-      this.syncLoading = false;
-      this.success = true;
-      this.successMessage = 'Projet synchronisé avec GitLab';
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Succès',
-        detail: 'Projet synchronisé avec GitLab'
+    this.gitlabService.syncGitLabProject(this.projectId)
+      .pipe(
+        catchError(error => {
+          console.error('Erreur lors de la synchronisation avec GitLab:', error);
+          this.error = true;
+          this.errorMessage = 'Impossible de synchroniser avec GitLab. Veuillez réessayer plus tard.';
+          return of(false);
+        }),
+        finalize(() => {
+          this.syncLoading = false;
+        })
+      )
+      .subscribe(success => {
+        if (success) {
+          this.success = true;
+          this.successMessage = 'Projet synchronisé avec GitLab';
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Succès',
+            detail: 'Projet synchronisé avec GitLab'
+          });
+        } else {
+          this.error = true;
+          this.errorMessage = 'La synchronisation a échoué. Veuillez réessayer plus tard.';
+        }
       });
-    }, 1500);
   }
 }

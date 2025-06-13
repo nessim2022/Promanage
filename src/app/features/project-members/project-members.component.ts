@@ -14,6 +14,8 @@ import { UserService, User, ProjectMember, Role } from '../../core/services/user
 import { AuthService } from '../../core/services/auth.service';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { InputTextModule } from 'primeng/inputtext';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-project-members',
@@ -28,7 +30,8 @@ import { of } from 'rxjs';
     ProgressBarModule,
     TooltipModule,
     ToastModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    InputTextModule
   ],
   providers: [MessageService, ConfirmationService],
   template: `
@@ -40,8 +43,12 @@ import { of } from 'rxjs';
       <!-- En-tête de section -->
       <div class="section-header">
         <h2>Membres du projet</h2>
-        <button *ngIf="authService.isSuperAdmin()" pButton pRipple type="button" icon="pi pi-plus" label="Ajouter un membre" 
-                class="p-button-primary" (click)="openAddMemberDialog()"></button>
+        <div class="header-buttons">
+          <button *ngIf="authService.isSuperAdmin()" pButton pRipple type="button" icon="pi pi-plus" label="Ajouter un membre" 
+                  class="p-button-primary" (click)="openAddMemberDialog()"></button>
+          <button *ngIf="authService.isSuperAdmin()" pButton pRipple type="button" icon="pi pi-github" label="Ajouter un membre GitLab" 
+                  class="p-button-secondary ml-2" (click)="openAddGitLabMemberDialog()"></button>
+        </div>
       </div>
       
       <!-- Indicateur de chargement -->
@@ -184,6 +191,53 @@ import { of } from 'rxjs';
           </button>
         </ng-template>
       </p-dialog>
+
+      <!-- Dialog d'ajout de membre GitLab -->
+      <p-dialog [(visible)]="addGitLabMemberDialog" [style]="{width: '500px'}" header="Ajouter un membre GitLab" 
+                [modal]="true" [closable]="!savingGitLab" [closeOnEscape]="!savingGitLab"
+                [blockScroll]="true" styleClass="p-fluid">
+        <div class="member-form">
+          <div class="form-group">
+            <label for="gitlabProjectUrl">URL du projet GitLab <span class="required-field">*</span></label>
+            <input id="gitlabProjectUrl" type="text" pInputText [(ngModel)]="gitlabProjectUrl" 
+                   placeholder="https://gitlab.com/votre-groupe/votre-projet" [disabled]="savingGitLab" />
+            <small class="field-help">Entrez l'URL du projet GitLab.</small>
+          </div>
+
+          <div class="form-group">
+            <label for="gitlabUserId">ID utilisateur GitLab <span class="required-field">*</span></label>
+            <input id="gitlabUserId" type="text" pInputText [(ngModel)]="gitlabUserId" 
+                   placeholder="ID ou nom d'utilisateur GitLab" [disabled]="savingGitLab" />
+            <small class="field-help">Entrez l'ID ou le nom d'utilisateur GitLab.</small>
+          </div>
+          
+          <div class="form-group">
+            <label for="gitlabAccessLevel">Niveau d'accès <span class="required-field">*</span></label>
+            <p-dropdown id="gitlabAccessLevel" [options]="gitlabAccessLevels" 
+                       [(ngModel)]="selectedGitLabAccessLevel" 
+                       optionLabel="label"
+                       optionValue="value"
+                       placeholder="Sélectionner un niveau d'accès"
+                       [disabled]="savingGitLab"></p-dropdown>
+            <small class="field-help">Sélectionnez le niveau d'accès de l'utilisateur dans ce projet GitLab.</small>
+          </div>
+          
+          <!-- Indicateur de progression -->
+          <div *ngIf="savingGitLab" class="progress-container">
+            <p-progressBar mode="indeterminate"></p-progressBar>
+            <span class="progress-status">Traitement en cours...</span>
+          </div>
+        </div>
+        
+        <ng-template pTemplate="footer">
+          <button pButton pRipple type="button" icon="pi pi-times" label="Annuler" 
+                  class="p-button-text" (click)="addGitLabMemberDialog = false" [disabled]="savingGitLab"></button>
+          <button pButton pRipple type="button" icon="pi pi-plus" label="Ajouter" 
+                  class="p-button-primary" (click)="addGitLabMember()" 
+                  [disabled]="!gitlabProjectUrl || !gitlabUserId || !selectedGitLabAccessLevel || savingGitLab">
+          </button>
+        </ng-template>
+      </p-dialog>
     </div>
   `,
   styles: [`
@@ -201,6 +255,15 @@ import { of } from 'rxjs';
         margin: 0;
         font-size: 1.5rem;
         color: #333;
+      }
+
+      .header-buttons {
+        display: flex;
+        gap: 10px;
+      }
+
+      .ml-2 {
+        margin-left: 0.5rem;
       }
     }
     
@@ -313,17 +376,32 @@ export class ProjectMembersComponent implements OnInit {
   // Dialog states
   addMemberDialog: boolean = false;
   editRoleDialog: boolean = false;
+  addGitLabMemberDialog: boolean = false;
   saving: boolean = false;
+  savingGitLab: boolean = false;
   
   // Selected items
   selectedUser: User | null = null;
   selectedRole: Role | null = null;
   selectedMember: ProjectMember | null = null;
 
+  // GitLab member fields
+  gitlabProjectUrl: string = '';
+  gitlabUserId: string = '';
+  selectedGitLabAccessLevel: number | null = null;
+  gitlabAccessLevels = [
+    { label: 'Guest', value: 10 },
+    { label: 'Reporter', value: 20 },
+    { label: 'Developer', value: 30 },
+    { label: 'Maintainer', value: 40 },
+    { label: 'Owner', value: 50 }
+  ];
+
   constructor(
     private userService: UserService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
+    private http: HttpClient,
     public authService: AuthService
   ) {}
 
@@ -424,6 +502,21 @@ export class ProjectMembersComponent implements OnInit {
     this.loadAvailableUsers();
   }
 
+  openAddGitLabMemberDialog() {
+    if (!this.authService.isSuperAdmin()) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Accès refusé',
+        detail: 'Seul le super administrateur peut ajouter des membres à GitLab.'
+      });
+      return;
+    }
+    this.gitlabProjectUrl = '';
+    this.gitlabUserId = '';
+    this.selectedGitLabAccessLevel = null;
+    this.addGitLabMemberDialog = true;
+  }
+
   openEditRoleDialog(member: ProjectMember) {
     this.selectedMember = member;
     // Find the role object that matches the member's role
@@ -460,6 +553,48 @@ export class ProjectMembersComponent implements OnInit {
           // Le message d'erreur est déjà affiché par le service utilisateur
         }
       });
+  }
+
+  addGitLabMember() {
+    if (!this.gitlabProjectUrl || !this.gitlabUserId || !this.selectedGitLabAccessLevel) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Veuillez remplir tous les champs obligatoires'
+      });
+      return;
+    }
+    
+    this.savingGitLab = true;
+    
+    // Appel à l'API pour ajouter le membre à GitLab
+    this.http.post('/api/gitlab/add-member', {
+      projectUrl: this.gitlabProjectUrl,
+      userId: this.gitlabUserId,
+      accessLevel: this.selectedGitLabAccessLevel
+    }).pipe(
+      catchError(error => {
+        console.error('Erreur lors de l\'ajout du membre GitLab:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: error.error?.message || 'Impossible d\'ajouter le membre à GitLab. Veuillez réessayer.'
+        });
+        return of(null);
+      }),
+      finalize(() => {
+        this.savingGitLab = false;
+      })
+    ).subscribe(response => {
+      if (response) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Membre ajouté à GitLab avec succès'
+        });
+        this.addGitLabMemberDialog = false;
+      }
+    });
   }
 
   updateMemberRole() {
