@@ -11,6 +11,7 @@ import { NotificationListComponent } from './features/notification-list/notifica
 import { AllDocumentsComponent } from './features/all-documents/all-documents.component';
 import { ProjectFormComponent } from './features/project-form/project-form.component';
 import { EditProjectFormComponent } from './features/edit-project-form/edit-project-form.component';
+import { UserProfilesComponent } from './features/user-profiles/user-profiles.component';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
@@ -28,6 +29,21 @@ export const routes: Routes = [
   {
     path: 'all-documents',
     component: AllDocumentsComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'user-profiles',
+    component: UserProfilesComponent,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'profile',
+    loadComponent: () => import('./features/profile/profile.component').then(m => m.ProfileComponent),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'profile-management',
+    loadComponent: () => import('./features/profile-management/profile-management.component').then(m => m.ProfileManagementComponent),
     canActivate: [authGuard]
   }
 ];

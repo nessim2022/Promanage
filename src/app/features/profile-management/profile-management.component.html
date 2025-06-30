@@ -1,0 +1,32 @@
+<div class="profile-management-container">
+  <h2>Gestion des profils utilisateurs</h2>
+  <div *ngIf="loading">Chargement des utilisateurs...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+  <table *ngIf="!loading && !error">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Rôles</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of users">
+        <td>{{ user.lastName }}</td>
+        <td>{{ user.firstName }}</td>
+        <td>{{ user.email }}</td>
+        <td>
+          <ng-container *ngIf="user.roles && user.roles.length > 0; else noRole">
+            <span *ngFor="let role of user.roles; let last = last">
+              {{ role.roleName }}<span *ngIf="!last">, </span>
+            </span>
+          </ng-container>
+          <ng-template #noRole>
+            <span>Aucun rôle</span>
+          </ng-template>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

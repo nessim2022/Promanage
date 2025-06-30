@@ -122,10 +122,7 @@ export class DocumentService {
     );
   }
 
- 
-
   uploadDocument(projectId: number, file: File, title: string): Observable<any> {
-    console.log("calling the upload doc")
     if (projectId <= 0) {
       this.messageService.add({
         severity: 'error',
@@ -134,46 +131,17 @@ export class DocumentService {
       });
       return throwError(() => new Error('Aucun projet sélectionné'));
     }
-  
+
     const formData = new FormData();
     formData.append('file', file);
-  
-    // Utilise l'URL attendue par le backend
-    const uploadUrl = `${this.alfrescoUrl}/upload/${projectId}?title=${encodeURIComponent(title)}`;
+    formData.append('title', title);
+    formData.append('projectId', projectId.toString());
+
+    const uploadUrl = `${this.apiUrl}/documents/upload`;
     console.log(`Tentative de téléversement vers: ${uploadUrl}`);
-  
-    // return this.checkAlfrescoAvailability().pipe(
-    //   switchMap(isAvailable => {
-    //     if (!isAvailable) {
-    //       this.messageService.add({
-    //         severity: 'error',
-    //         summary: 'Erreur de connexion',
-    //         detail: 'Le serveur de documents est actuellement indisponible. Veuillez réessayer plus tard.'
-    //       });
-    //       return throwError(() => new Error('Le serveur de documents est indisponible'));
-    //     }
-  
-    //     return this.http.post(uploadUrl, formData, {
-    //       withCredentials: true
-    //     }).pipe(
-    //       timeout(30000),
-    //       tap(response => {
-    //         console.log('Document téléversé avec succès:', response);
-    //         this.messageService.add({
-    //           severity: 'success',
-    //           summary: 'Téléversement réussi',
-    //           detail: 'Le document a été téléversé avec succès.'
-    //         });
-    //       }),
-    //       catchError(error => {
-    //         console.error('Erreur lors du téléversement:', error);
-    //         return this.handleSessionExpired(error);
-    //       })
-    //     );
-    //   })
-    // );
 
     return this.http.post(uploadUrl, formData, {
+      headers: this.getHeaders(),
       withCredentials: true
     }).pipe(
       timeout(30000),
@@ -206,12 +174,9 @@ export class DocumentService {
     formData.append('file', file);
     formData.append('title', title);
     
-    // Correction de l'URL Alfresco pour s'assurer qu'elle ne se termine pas par ':'    
-    const alfrescoUrl = environment.alfrescoUrl.endsWith(':') 
-      ? environment.alfrescoUrl.slice(0, -1) 
-      : environment.alfrescoUrl;
-    
-    console.log(`Tentative de téléversement vers Alfresco: ${alfrescoUrl}/upload/${projectId}`);
+    // Utiliser l'URL d'API pour l'upload via Alfresco
+    const uploadUrl = `${this.apiUrl}/documents/alfresco/upload/${projectId}`;
+    console.log(`Tentative de téléversement vers Alfresco via API: ${uploadUrl}`);
     
     return this.checkAlfrescoAvailability().pipe(
       switchMap(isAvailable => {
@@ -224,8 +189,7 @@ export class DocumentService {
           return throwError(() => new Error('Le serveur Alfresco est indisponible'));
         }
         
-        return this.http.post(`${alfrescoUrl}/upload/${projectId}`, formData, { 
-          responseType: 'text',
+        return this.http.post(uploadUrl, formData, { 
           headers: this.getHeaders(),
           withCredentials: true
         }).pipe(

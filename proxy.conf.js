@@ -135,6 +135,18 @@ module.exports = {
       'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
     }
   },
+  '/api/documents': {
+    target: 'http://localhost:8082',
+    secure: false,
+    changeOrigin: true,
+    logLevel: 'debug',
+    buffer: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    }
+  },
   '/gitlab': {
     target: 'http://localhost:8082',
     secure: false,

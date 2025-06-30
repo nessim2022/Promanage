@@ -30,9 +30,11 @@ export class SidebarComponent implements OnInit {
   menuItems: MenuItem[] = [
     { label: 'Tableau de bord', icon: 'pi pi-home', route: '/dashboard', requiresAuth: true },
     { label: 'Projets', icon: 'pi pi-folder', route: '/projects', requiresAuth: true, badge: 3 },
-    
     { label: 'Tous les documents', icon: 'pi pi-copy', route: '/all-documents', requiresAuth: true },
     { label: 'GitLab', icon: 'pi pi-code', route: '/gitlab', requiresAuth: true },
+    { label: 'Mon profil', icon: 'pi pi-user', route: '/profile', requiresAuth: true },
+    { label: 'Profils utilisateurs', icon: 'pi pi-users', route: '/user-profiles', requiresAuth: true },
+    { label: 'Gérer les profils', icon: 'pi pi-users', route: '/profile-management', requiresAuth: true, roles: ['superAdmin'] },
     { label: 'Notifications', icon: 'pi pi-bell', route: '/notifications', requiresAuth: true, badge: 5, roles: ['superAdmin'] },
   ];
   userRoles: string[] = [];

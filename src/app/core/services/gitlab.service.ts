@@ -122,15 +122,10 @@ export class GitlabService {
       'Accept': 'application/json'
     };
     
-    // Créer un objet HttpParams pour les paramètres
-    let httpParams = new HttpParams();
-    httpParams = httpParams.set('url', url);
-    
     console.log('En-têtes de la requête:', headers);
-    console.log('Paramètres de la requête:', httpParams.toString());
     
     return this.http.get<GitLabMember[]>(`${this.apiUrl}/validate-gitlab-url`, { 
-      params: httpParams,
+      params: { url },
       headers,
       withCredentials: true  // Ajouter cette option pour inclure les cookies dans la requête
     }).pipe(
