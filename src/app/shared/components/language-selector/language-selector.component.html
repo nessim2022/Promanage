@@ -1,0 +1,10 @@
+<div class="language-selector">
+  <button 
+    pButton 
+    type="button" 
+    [label]="currentLanguage.flag" 
+    class="p-button-rounded p-button-text lang-button"
+    (click)="langMenu.toggle($event)"
+  ></button>
+  <p-menu #langMenu [model]="languageMenuItems" [popup]="true"></p-menu>
+</div>

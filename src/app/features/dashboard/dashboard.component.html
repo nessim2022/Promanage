@@ -1,0 +1,189 @@
+<!-- src/app/features/dashboard/dashboard.component.html -->
+<p-toast></p-toast>
+<div class="dashboard-container">
+  <!-- Professional Dashboard Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1>Tableau de bord</h1>
+        <p class="subtitle">Vue d'ensemble et gestion de vos projets</p>
+      </div>
+      <div class="header-right">
+        <div class="date-info">
+          <i class="pi pi-calendar"></i>
+          <span>{{ currentDate | date:'dd MMMM yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="pi pi-folder"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ projects.length || 0 }}</span>
+          <span class="stat-label">Total des projets</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ getCompletedProjectsCount() }}</span>
+          <span class="stat-label">Projets terminés</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="pi pi-clock"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ getInProgressProjectsCount() }}</span>
+          <span class="stat-label">Projets en cours</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">
+          <i class="pi pi-users"></i>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ getTeamMembersCount() }}</span>
+          <span class="stat-label">Membres d'équipe</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="loading" class="loading-container">
+    <p-progressBar mode="indeterminate"></p-progressBar>
+    <div class="loading-text">Chargement des projets...</div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error && !loading" class="error-container">
+    <p-card styleClass="error-card">
+      <div class="error-message">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+      <div class="retry-button">
+        <p-button label="Réessayer" (click)="loadProjects()"></p-button>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Projects section -->
+  <div *ngIf="!loading && !error">
+    <!-- No projects message -->
+    <div *ngIf="projects.length === 0" class="no-projects">
+      <p-card styleClass="empty-card">
+        <div class="empty-message">
+          <i class="pi pi-info-circle"></i>
+          <span>Vous n'avez pas encore de projets.</span>
+        </div>
+        <div class="create-button">
+          <p-button label="Créer un projet" icon="pi pi-plus" routerLink="/projects"></p-button>
+        </div>
+      </p-card>
+    </div>
+
+    <!-- Projects table -->
+    <div *ngIf="projects.length > 0" class="projects-table">
+      <p-card>
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <h2>Mes Projets</h2>
+          </div>
+        </ng-template>
+        
+        <p-table [value]="projects" [paginator]="true" [rows]="5" 
+                styleClass="p-datatable-striped">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Nom du Projet</th>
+              <th>Description</th>
+              <th>Date de création</th>
+<th>Membres</th>
+              <th>État</th>
+              <th>Progression</th>
+              <th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-project>
+            <tr>
+              <td>{{ project.name }}</td>
+              <td>{{ project.description }}</td>
+              <td>{{ project.creationDate | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStateClass(project.projectId)">
+                  {{ getProjectState(project.projectId) }}
+                </span>
+              </td>
+              <td>
+                <p-progressBar [value]="getProjectProgress(project.projectId)" [showValue]="true"></p-progressBar>
+              </td>
+              <td>
+                <div *ngIf="project.members && project.members.length > 0">
+                  <ul class="members-list">
+                    <li *ngFor="let member of project.members">
+                      <i class="pi pi-user"></i> {{ member.email }} <span *ngIf="member.name">({{ member.name }})</span>
+                    </li>
+                  </ul>
+                </div>
+                <span *ngIf="!project.members || project.members.length === 0">-</span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button pButton type="button" icon="pi pi-eye" class="p-button-rounded p-button-info p-button-sm"
+                          pTooltip="Voir les détails" tooltipPosition="top"
+                          [routerLink]="['/projects', project.projectId]"></button>
+                  <button pButton type="button" icon="pi pi-file" class="p-button-rounded p-button-secondary p-button-sm"
+                          pTooltip="Voir les documents" tooltipPosition="top"
+                          (click)="viewDocuments(project.projectId)"></button>
+                  <button *ngIf="isSuperAdmin" pButton type="button" icon="pi pi-pencil" class="p-button-rounded p-button-success p-button-sm"
+                          pTooltip="<b>UPDATE</b>" tooltipPosition="top" escape="false"
+                          [routerLink]="['/projects', project.projectId, 'edit']"></button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </p-card>
+    </div>
+  </div>
+
+<!-- Section d'affichage des documents associés au projet sélectionné -->
+<div *ngIf="selectedProject">
+  <h3>Documents du projet : {{ selectedProject.name }}</h3>
+  <div *ngIf="loadingDocuments">Chargement des documents...</div>
+  <div *ngIf="documentsError" class="error">{{ documentsErrorMessage }}</div>
+  <table *ngIf="!loadingDocuments && !documentsError && selectedProjectDocuments.length > 0" class="documents-table">
+    <thead>
+      <tr>
+        <th>Titre</th>
+        <th>Nom du fichier</th>
+        <th>Date de création</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let doc of selectedProjectDocuments">
+        <td>{{ doc.title }}</td>
+        <td>{{ doc.fileName }}</td>
+        <td>{{ doc.creationDate | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ doc.mimeType }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <div *ngIf="!loadingDocuments && !documentsError && selectedProjectDocuments.length === 0">
+    Aucun document trouvé pour ce projet.
+  </div>
+</div>
+</div>

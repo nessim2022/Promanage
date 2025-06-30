@@ -1,0 +1,47 @@
+name: Frontend CI Pipeline
+
+# Déclenche le workflow sur les push et pull requests vers la branche main
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# Définit les tâches à exécuter
+jobs:
+  build-test-analyze:
+    # Le type de machine sur laquelle exécuter le job
+    runs-on: ubuntu-latest
+
+    steps:
+      # Étape 1: Récupère le code de votre dépôt
+      # fetch-depth: 0 est nécessaire pour que SonarCloud puisse analyser l'historique des commits
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Étape 2: Configure l'environnement Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Version de Node.js à utiliser
+
+      # Étape 3: Installe les dépendances du projet
+      - name: Install dependencies
+        run: npm install
+
+      # Étape 4: Construit l'application pour la production
+      - name: Build
+        run: npm run build -- --configuration production
+
+      # Étape 5: Exécute les tests unitaires et génère le rapport de couverture
+      - name: Test and Coverage
+        run: npm test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage
+
+      # Étape 6: Lance l'analyse SonarCloud
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Fourni automatiquement par GitHub
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Le secret que vous avez configuré 

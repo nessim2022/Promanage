@@ -1,0 +1,239 @@
+<div class="project-detail-container">
+  <!-- Toast pour les notifications -->
+  <p-toast></p-toast>
+  <p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+  
+  <!-- Titre et actions de page -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1>Détails du Projet</h1>
+      <p class="subtitle" *ngIf="!loading && !errorMessage">{{ project.name }}</p>
+    </div>
+    <div class="header-right">
+      <button pButton pRipple type="button" icon="pi pi-arrow-left" label="Retour" class="p-button-outlined p-button-label" routerLink="/dashboard"></button>
+    </div>
+  </div>
+  
+  <!-- Indicateur de chargement -->
+  <div *ngIf="loading" class="loading-container">
+    <p-progressBar mode="indeterminate"></p-progressBar>
+    <div class="loading-text">Chargement des détails du projet...</div>
+  </div>
+  
+  <!-- Message d'erreur -->
+  <div *ngIf="errorMessage && !loading" class="error-container">
+    <p-card styleClass="error-card">
+      <div class="error-message">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+      <div class="retry-button">
+        <button pButton pRipple type="button" label="Réessayer" (click)="loadProject()"></button>
+      </div>
+    </p-card>
+  </div>
+  
+  <!-- Contenu principal -->
+  <div *ngIf="!loading && !errorMessage" class="project-content">
+    <!-- Résumé du projet -->
+    <div class="project-summary">
+      <p-card>
+        <div class="summary-content">
+          <div class="summary-left">
+            <h2>{{ project.name }}</h2>
+            <p>{{ project.description }}</p>
+            <div class="project-dates">
+              <div class="date-item">
+                <i class="pi pi-calendar"></i>
+                <span>Début: {{ startDateValue | date:'dd MMM yyyy' }}</span>
+              </div>
+              <div class="date-item">
+                <i class="pi pi-calendar-times"></i>
+                <span>Fin: {{ endDateValue | date:'dd MMM yyyy' }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="summary-right">
+            <div class="progress-status">
+              <span class="status-badge" [ngClass]="getStateClass()">
+                {{ projectProgress.state }}
+      </span>
+            </div>
+            <div class="progress-bar-container">
+              <label>Progression: {{ projectProgress.progress }}%</label>
+              <p-progressBar [value]="projectProgress.progress" [styleClass]="getProgressColorClass()"></p-progressBar>
+            </div>
+          </div>
+        </div>
+      </p-card>
+    </div>
+    
+    <!-- Onglets du projet -->
+    <p-tabView [(activeIndex)]="activeTabIndex">
+      <!-- Onglet Informations -->
+      <p-tabPanel header="Informations">
+        <div class="tab-content">
+          <div class="form-group">
+            <label for="projectName">Nom du projet</label>
+            <input id="projectName" type="text" pInputText [(ngModel)]="project.name" class="form-control" />
+          </div>
+          
+          <div class="form-group">
+            <label for="projectDescription">Description</label>
+            <textarea id="projectDescription" pInputTextarea [(ngModel)]="project.description" rows="5" class="form-control"></textarea>
+          </div>
+          
+          <div class="form-row">
+            <div class="form-group">
+        <label for="startDate">Date de début</label>
+              <p-calendar id="startDate" [(ngModel)]="startDateValue" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
+            </div>
+            
+            <div class="form-group">
+        <label for="endDate">Date de fin</label>
+              <p-calendar id="endDate" [(ngModel)]="endDateValue" dateFormat="dd/mm/yy" [showIcon]="true"></p-calendar>
+            </div>
+          </div>
+          
+          <!-- Champ URL GitLab -->
+          <!-- <div class="form-group gitlab-url-container">
+            <label for="gitlabUrl">URL GitLab</label>
+            <div class="p-inputgroup">
+              <input id="gitlabUrl" type="text" pInputText [(ngModel)]="project.gitlabURL" class="form-control" />
+              <button pButton pRipple type="button" icon="pi pi-gitlab" label="Accéder" 
+                     [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
+                     (click)="openGitLabUrl()" class="p-button-success"></button>
+            </div>
+          </div> -->
+          
+          <div class="form-actions">
+            <button pButton pRipple type="button" label="Enregistrer" icon="pi pi-save" 
+                    (click)="updateProject()" [disabled]="saving"></button>
+            <button pButton pRipple type="button" label="Supprimer" icon="pi pi-trash" 
+                    class="p-button-danger p-button-outlined" (click)="confirmDelete()" [disabled]="saving"></button>
+          </div>
+        </div>
+      </p-tabPanel>
+      
+      <!-- Onglet Documents -->
+      <p-tabPanel header="Documents">
+        <div class="tab-content">
+          <div *ngIf="project && project.projectId > 0; else noProjectDocs">
+  <p-card>
+   
+    <app-document-list [projectId]="project.projectId"></app-document-list>
+  </p-card>
+</div>
+          <ng-template #noProjectDocs>
+            <div class="loading-placeholder">
+              <p-card>
+                <div class="loading-message" *ngIf="loading">
+                  <i class="pi pi-spin pi-spinner" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                  <p>Chargement des informations du projet...</p>
+                </div>
+                <div class="error-message" *ngIf="!loading">
+                  <i class="pi pi-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; color: #e74c3c;"></i>
+                  <p>Impossible de charger les documents. Veuillez réessayer plus tard.</p>
+                  <button pButton pRipple type="button" label="Réessayer" 
+                          icon="pi pi-refresh" (click)="loadProject()"></button>
+                </div>
+              </p-card>
+            </div>
+          </ng-template>
+        </div>
+      </p-tabPanel>
+      
+      <!-- Onglet Git Integration -->
+      <p-tabPanel header="GitLab">
+        <div class="tab-content">
+          <div *ngIf="project && project.projectId > 0; else noProjectId">
+            <div class="form-group gitlab-url-container">
+              <label for="gitlabUrl">URL GitLab</label>
+              <div class="p-inputgroup">
+                <input id="gitlabUrl" type="text" pInputText [(ngModel)]="project.gitlabURL" class="form-control" />
+                <button pButton pRipple type="button" icon="pi pi-gitlab" label="Accéder" 
+                       [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
+                       (click)="openGitLabUrl()" class="p-button-success"></button>
+              </div>
+            </div>
+          </div>
+          <ng-template #noProjectId>
+            <div class="loading-placeholder">
+              <p-card>
+                <div class="loading-message" *ngIf="loading">
+                  <i class="pi pi-spin pi-spinner" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                  <p>Chargement des informations du projet...</p>
+                </div>
+                <div class="error-message" *ngIf="!loading">
+                  <i class="pi pi-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; color: #e74c3c;"></i>
+                  <p>Impossible de charger les informations GitLab. Veuillez réessayer plus tard.</p>
+                  <button pButton pRipple type="button" label="Réessayer" 
+                          icon="pi pi-refresh" (click)="loadProject()"></button>
+                </div>
+                <div class="form-group gitlab-url-container">
+                  <label for="gitlabUrl">URL GitLab</label>
+                  <div class="p-inputgroup">
+                    <input id="gitlabUrl" type="text" pInputText [(ngModel)]="project.gitlabURL" class="form-control" />
+                    <button pButton pRipple type="button" icon="pi pi-gitlab" label="Accéder" 
+                          [disabled]="!project.gitlabURL || project.gitlabURL.trim().length === 0"
+                          (click)="openGitLabUrl()" class="p-button-success"></button>
+                  </div>
+                </div>
+              </p-card>
+            </div>
+          </ng-template>
+        </div>
+      </p-tabPanel>
+      
+      <!-- Onglet Membres GitLab -->
+      <p-tabPanel header="Membres GitLab">
+        <div class="tab-content">
+          <div *ngIf="project && project.projectId > 0 && project.gitlabURL; else noGitlabUrl">
+            <app-gitlab-members [projectId]="project.projectId" [gitlabUrl]="project.gitlabURL"></app-gitlab-members>
+          </div>
+          <ng-template #noGitlabUrl>
+            <div class="loading-placeholder">
+              <p-card>
+                <div class="loading-message" *ngIf="loading">
+                  <i class="pi pi-spin pi-spinner" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                  <p>Chargement des informations du projet...</p>
+                </div>
+                <div class="error-message" *ngIf="!loading">
+                  <i class="pi pi-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; color: #e74c3c;"></i>
+                  <p>Aucune URL GitLab n'est configurée pour ce projet. Veuillez d'abord configurer l'intégration GitLab.</p>
+                  <button pButton pRipple type="button" label="Configurer GitLab" 
+                          icon="pi pi-cog" (click)="activeTabIndex = 2"></button>
+                </div>
+              </p-card>
+            </div>
+          </ng-template>
+        </div>
+      </p-tabPanel>
+      
+      <!-- Onglet Membres -->
+      <p-tabPanel header="Membres">
+        <div class="tab-content">
+          <div *ngIf="project && project.projectId > 0; else noProjectMembers">
+            <app-project-members [projectId]="project.projectId"></app-project-members>
+          </div>
+          <ng-template #noProjectMembers>
+            <div class="loading-placeholder">
+              <p-card>
+                <div class="loading-message" *ngIf="loading">
+                  <i class="pi pi-spin pi-spinner" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                  <p>Chargement des informations du projet...</p>
+                </div>
+                <div class="error-message" *ngIf="!loading">
+                  <i class="pi pi-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem; color: #e74c3c;"></i>
+                  <p>Impossible de charger les membres du projet. Veuillez réessayer plus tard.</p>
+                  <button pButton pRipple type="button" label="Réessayer" 
+                          icon="pi pi-refresh" (click)="loadProject()"></button>
+    </div>
+  </p-card>
+            </div>
+          </ng-template>
+        </div>
+      </p-tabPanel>
+    </p-tabView>
+  </div>
+</div>

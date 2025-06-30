@@ -1,0 +1,20 @@
+<div class="app-container">
+  <app-navbar *ngIf="shouldShowSidebar()"></app-navbar>
+  
+  <app-sidebar 
+    *ngIf="shouldShowSidebar()" 
+    [collapsed]="sidebarCollapsed"
+    (toggleSidebar)="toggleSidebar()"
+  ></app-sidebar>
+  
+  <div 
+    class="main-content" 
+    [class.with-sidebar]="shouldShowSidebar() && !sidebarCollapsed"
+    [class.with-collapsed-sidebar]="shouldShowSidebar() && sidebarCollapsed"
+    [class.with-navbar]="shouldShowSidebar()"
+  >
+    <router-outlet />
+  </div>
+</div>
+
+<p-toast></p-toast>

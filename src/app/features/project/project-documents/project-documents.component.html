@@ -1,0 +1,21 @@
+<div class="project-documents-container">
+  <div class="header">
+    <h1 class="title">Documents du projet sélectionné</h1>
+    <div class="actions">
+      <button pButton pRipple label="Ajouter un document" icon="pi pi-plus" class="p-button-primary" 
+              (click)="showAddDocumentDialog()"></button>
+      <button pButton pRipple label="Ajouter un lien externe" icon="pi pi-link" class="p-button-secondary ml-2"
+              (click)="showAddExternalLinkDialog()"></button>
+    </div>
+  </div>
+
+  <div class="content">
+    <p-card>
+      <!-- Utilisation du composant document-list pour afficher les documents -->
+      <app-document-list 
+        [projectId]="projectId" 
+        [isAdmin]="isAdmin">
+      </app-document-list>
+    </p-card>
+  </div>
+</div>

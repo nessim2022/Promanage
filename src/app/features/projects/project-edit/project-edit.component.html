@@ -1,0 +1,63 @@
+<div class="container">
+  <div class="card">
+    <h2>Modifier le projet</h2>
+    
+    <div *ngIf="loading" class="loading-spinner">
+      <p-progressSpinner></p-progressSpinner>
+      <p>Chargement en cours...</p>
+    </div>
+    
+    <form [formGroup]="projectForm" (ngSubmit)="onSubmit()" *ngIf="!loading">
+      <div class="p-fluid p-formgrid p-grid">
+        <div class="p-field p-col-12">
+          <label for="name">Nom du projet*</label>
+          <input id="name" type="text" pInputText formControlName="name" 
+                 [ngClass]="{'ng-invalid ng-dirty': submitted && projectForm.controls.name.errors}">
+          <small *ngIf="submitted && projectForm.controls.name.errors" class="p-error">Le nom du projet est requis</small>
+        </div>
+        
+        <div class="p-field p-col-12">
+          <label for="description">Description*</label>
+          <textarea id="description" pInputTextarea formControlName="description" rows="5"
+                    [ngClass]="{'ng-invalid ng-dirty': submitted && projectForm.controls.description.errors}"></textarea>
+          <small *ngIf="submitted && projectForm.controls.description.errors" class="p-error">La description est requise</small>
+        </div>
+        
+        <div class="p-field p-col-12 p-md-6">
+          <label for="startDate">Date de début*</label>
+          <p-calendar id="startDate" formControlName="startDate" dateFormat="dd/mm/yy"
+                      [showIcon]="true" [ngClass]="{'ng-invalid ng-dirty': submitted && projectForm.controls.startDate.errors}"></p-calendar>
+          <small *ngIf="submitted && projectForm.controls.startDate.errors" class="p-error">La date de début est requise</small>
+        </div>
+        
+        <div class="p-field p-col-12 p-md-6">
+          <label for="endDate">Date de fin*</label>
+          <p-calendar id="endDate" formControlName="endDate" dateFormat="dd/mm/yy"
+                      [showIcon]="true" [ngClass]="{'ng-invalid ng-dirty': submitted && projectForm.controls.endDate.errors}"></p-calendar>
+          <small *ngIf="submitted && projectForm.controls.endDate.errors" class="p-error">La date de fin est requise</small>
+        </div>
+        
+        <div class="p-field p-col-12">
+          <label for="gitlabURL">URL GitLab</label>
+          <input id="gitlabURL" type="text" pInputText formControlName="gitlabURL">
+        </div>
+        
+        <div class="p-field p-col-12">
+          <label for="progressStateId">État d'avancement</label>
+          <p-dropdown id="progressStateId" formControlName="progressStateId" [options]="[
+            {label: 'Non commencé', value: 1},
+            {label: 'En cours', value: 2},
+            {label: 'Terminé', value: 3}
+          ]"></p-dropdown>
+        </div>
+      </div>
+      
+      <div class="button-container">
+        <button pButton type="button" label="Annuler" class="p-button-secondary" 
+                (click)="router.navigate(['/dashboard'])"></button>
+        <button pButton type="submit" label="Mettre à jour" class="p-button-primary" 
+                [disabled]="loading"></button>
+      </div>
+    </form>
+  </div>
+</div>

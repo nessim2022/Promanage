@@ -1,0 +1,19 @@
+<!-- src/app/features/notification-list/notification-list.component.html -->
+<p-card header="Notifications">
+    <p-table [value]="notifications" [tableStyle]="{ 'min-width': '50rem' }">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Type</th>
+          <th>Contenu</th>
+          <th>Date</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-notification>
+        <tr>
+          <td>{{ notification.type }}</td>
+          <td>{{ notification.content }}</td>
+          <td>{{ notification.date }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>

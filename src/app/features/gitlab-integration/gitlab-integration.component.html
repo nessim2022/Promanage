@@ -1,0 +1,199 @@
+<!-- src/app/features/gitlab-integration/gitlab-integration.component.html -->
+<div class="gitlab-integration-container">
+  <!-- Toast pour les notifications -->
+  <p-toast></p-toast>
+  
+  <!-- Bouton GitLab URL - Toujours visible s'il y a une URL -->
+  <div *ngIf="gitlabUrl && gitlabUrl.trim().length > 0" class="gitlab-url-button-container">
+    <a [href]="gitlabUrl" target="_blank" class="gitlab-url-button">
+      <button pButton pRipple type="button" icon="pi pi-external-link" label="Accéder au dépôt GitLab" 
+              class="p-button-primary p-button-lg">
+      </button>
+    </a>
+  </div>
+  
+  <!-- Indicateur de chargement -->
+  <div *ngIf="loading" class="loading-container">
+    <p-progressBar mode="indeterminate"></p-progressBar>
+    <div class="loading-text">Chargement des informations GitLab...</div>
+  </div>
+  
+  <!-- Message d'erreur -->
+  <div *ngIf="error && !loading" class="error-container">
+    <p-card styleClass="error-card">
+      <div class="error-message">
+        <i class="pi pi-exclamation-triangle"></i>
+        <span>{{ errorMessage }}</span>
+      </div>
+      <div class="action-buttons">
+        <button pButton pRipple type="button" label="Réessayer" (click)="loadGitLabProject()"></button>
+        <button pButton pRipple type="button" label="Synchroniser avec GitLab" 
+                class="p-button-secondary" (click)="syncGitLabProject()" 
+                [disabled]="syncInProgress">
+          <span *ngIf="syncInProgress" class="sync-progress">
+            <i class="pi pi-spin pi-spinner"></i>
+          </span>
+        </button>
+      </div>
+    </p-card>
+  </div>
+  
+  <!-- Aucun projet GitLab lié -->
+  <div *ngIf="!loading && !error && !gitlabProject" class="no-project-container">
+    <p-card styleClass="no-project-card">
+      <div class="no-project-message">
+        <i class="pi pi-github"></i>
+        <h3>Aucun dépôt GitLab associé</h3>
+        <p>Ce projet n'a pas encore été lié à un dépôt GitLab ou le serveur n'a pas pu récupérer les informations.</p>
+        
+        <div *ngIf="gitlabUrl && gitlabUrl.trim().length > 0" class="mt-4">
+          <h4>Votre URL GitLab est configurée comme:</h4>
+          <div class="gitlab-url-display">
+            <span>{{ gitlabUrl }}</span>
+            <a [href]="gitlabUrl" target="_blank" class="url-link">
+              <i class="pi pi-external-link"></i>
+            </a>
+          </div>
+          <p class="mt-2">Assurez-vous que l'URL est correcte et que vous avez les permissions nécessaires.</p>
+        </div>
+        
+        <div class="action-buttons mt-4">
+          <button pButton pRipple type="button" label="Synchroniser avec GitLab" 
+                  class="p-button-primary" (click)="syncGitLabProject()" 
+                  [disabled]="syncInProgress || !gitlabUrl">
+            <span *ngIf="syncInProgress" class="sync-progress">
+              <i class="pi pi-spin pi-spinner"></i>
+            </span>
+          </button>
+        </div>
+      </div>
+    </p-card>
+  </div>
+  
+  <!-- Contenu principal -->
+  <div *ngIf="!loading && !error && gitlabProject" class="gitlab-content">
+    <!-- En-tête de la section -->
+    <div class="section-header">
+      <h2>Intégration GitLab</h2>
+      <div class="header-actions">
+        <button pButton pRipple type="button" icon="pi pi-refresh" label="Synchroniser" 
+                class="p-button-primary" (click)="syncGitLabProject()" 
+                [disabled]="syncInProgress">
+          <span *ngIf="syncInProgress" class="sync-progress">
+            <i class="pi pi-spin pi-spinner"></i>
+          </span>
+        </button>
+        <button pButton pRipple type="button" icon="pi pi-user-plus" label="Ajouter un membre" 
+                class="p-button-secondary" (click)="openAddMemberDialog()"></button>
+      </div>
+    </div>
+    
+    <!-- Informations du projet -->
+    <p-card>
+      <div class="project-info">
+        <div class="info-item">
+          <label>Nom du projet</label>
+          <div class="value">{{ gitlabProject.name }}</div>
+        </div>
+        <div class="info-item">
+          <label>URL GitLab</label>
+          <div class="value gitlab-url-container">
+            <a [href]="gitlabProject.webUrl" target="_blank" class="gitlab-link">
+              {{ gitlabProject.webUrl }}
+              <i class="pi pi-external-link"></i>
+            </a>
+          </div>
+        </div>
+        <div class="info-item">
+          <label>Nombre de contributeurs</label>
+          <div class="value">{{ gitlabProject && gitlabProject.contributors ? gitlabProject.contributors.length : 0 }}</div>
+        </div>
+        <div class="info-item">
+          <label>Total des commits</label>
+          <div class="value">{{ getTotalCommits() }}</div>
+        </div>
+      </div>
+    </p-card>
+    
+    <!-- Section des graphiques et statistiques -->
+    <div class="stats-section" *ngIf="gitlabProject.contributors && gitlabProject.contributors.length > 0">
+      <div class="row">
+        <!-- Graphique des contributions -->
+        <div class="chart-container">
+          <p-card header="Répartition des contributions">
+            <div class="chart-wrapper">
+              <p-chart type="pie" [data]="contributionChartData" [options]="contributionChartOptions" height="300px"></p-chart>
+            </div>
+          </p-card>
+        </div>
+        
+        <!-- Top contributeurs -->
+        <div class="top-contributors">
+          <p-card header="Top contributeurs">
+            <div class="contributor-list">
+              <div *ngFor="let contributor of getTopContributors()" class="contributor-item">
+                <div class="contributor-info">
+                  <div class="contributor-name">{{ contributor.name || contributor.email }}</div>
+                  <div class="contributor-email" *ngIf="contributor.name">{{ contributor.email }}</div>
+                </div>
+                <div class="contributor-stats">
+                  <div class="commits">{{ contributor.commits }} commits</div>
+                  <div class="percentage">{{ getContributorPercentage(contributor) }}%</div>
+                </div>
+              </div>
+            </div>
+          </p-card>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Liste complète des contributeurs -->
+    <p-card header="Tous les contributeurs" *ngIf="gitlabProject.contributors && gitlabProject.contributors.length > 0">
+      <p-table [value]="gitlabProject.contributors" [paginator]="true" [rows]="5" 
+              styleClass="p-datatable-striped">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Commits</th>
+            <th>Contribution</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-contributor>
+          <tr>
+            <td>{{ contributor.name || 'N/A' }}</td>
+            <td>{{ contributor.email }}</td>
+            <td>{{ contributor.commits }}</td>
+            <td>
+              <div class="contribution-progress">
+                <p-progressBar [value]="getContributorPercentage(contributor)"></p-progressBar>
+                <span class="percentage-text">{{ getContributorPercentage(contributor) }}%</span>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </p-card>
+  </div>
+  
+  <!-- Dialog pour ajouter un membre -->
+  <p-dialog [(visible)]="addMemberDialog" header="Ajouter un membre" 
+            [style]="{width: '450px'}" [modal]="true">
+    <div class="add-member-form">
+      <div class="form-group">
+        <label for="memberEmail">Adresse e-mail</label>
+        <input id="memberEmail" type="email" pInputText [(ngModel)]="newMemberEmail" 
+               placeholder="Entrez l'adresse e-mail" class="w-full">
+      </div>
+      <div class="form-note">
+        <small>Le membre sera ajouté au projet GitLab avec le rôle Developer.</small>
+      </div>
+    </div>
+    <ng-template pTemplate="footer">
+      <button pButton pRipple type="button" label="Annuler" icon="pi pi-times" 
+              class="p-button-text" (click)="addMemberDialog = false"></button>
+      <button pButton pRipple type="button" label="Ajouter" icon="pi pi-check" 
+              class="p-button-primary" (click)="addMember()"></button>
+    </ng-template>
+  </p-dialog>
+</div>

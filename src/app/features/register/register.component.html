@@ -1,0 +1,180 @@
+<div class="register-page">
+  <div class="register-container">
+    <!-- Section image -->
+    <div class="image-section">
+      <div class="image-content">
+        <img src="assets/images/NV_LOGO_SIGA_2_69.png" alt="Company Logo" class="company-logo">
+        <h1>Rejoignez SIGA</h1>
+        <p>Commencez à gérer vos projets et documents dès aujourd'hui</p>
+      </div>
+    </div>
+
+    <!-- Formulaire d'inscription -->
+    <div class="form-section">
+      <p-card class="register-card">
+
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <img src="assets/images/NV_LOGO_SIGA_2_69.png" alt="Company Logo" class="company-logo">
+            <h2>Inscription</h2>
+            <p>Créez votre compte pour commencer</p>
+          </div>
+        </ng-template>
+
+        <form [formGroup]="registerForm" (ngSubmit)="register()" class="register-form">
+          <div class="form-group">
+            <!-- Nom -->
+            <div class="p-field">
+              <label for="firstName">Nom</label>
+              <div class="p-input-icon-left w-full">
+                <i class="pi pi-user"></i>
+                <input 
+                  pInputText 
+                  id="firstName" 
+                  formControlName="firstName" 
+                  class="w-full"
+                  [ngClass]="{'ng-invalid ng-dirty': registerForm.get('firstName')?.invalid && registerForm.get('firstName')?.touched}"
+                />
+              </div>
+              <small *ngIf="registerForm.get('firstName')?.hasError('required') && registerForm.get('firstName')?.touched" class="p-error">
+                Ce champ est requis
+              </small>
+            </div>
+
+            <!-- Prénom -->
+            <div class="p-field mt-3">
+              <label for="lastName">Prénom</label>
+              <div class="p-input-icon-left w-full">
+                <i class="pi pi-user"></i>
+                <input 
+                  pInputText 
+                  id="lastName" 
+                  formControlName="lastName" 
+                  class="w-full"
+                  [ngClass]="{'ng-invalid ng-dirty': registerForm.get('lastName')?.invalid && registerForm.get('lastName')?.touched}"
+                />
+              </div>
+              <small *ngIf="registerForm.get('lastName')?.hasError('required') && registerForm.get('lastName')?.touched" class="p-error">
+                Ce champ est requis
+              </small>
+            </div>
+
+            <!-- Email -->
+            <div class="p-field mt-3">
+              <label for="email">Email</label>
+              <div class="p-input-icon-left w-full">
+                <i class="pi pi-envelope"></i>
+                <input 
+                  pInputText 
+                  id="email" 
+                  formControlName="email" 
+                  class="w-full"
+                  [ngClass]="{'ng-invalid ng-dirty': registerForm.get('email')?.invalid && registerForm.get('email')?.touched}"
+                />
+              </div>
+              <small *ngIf="registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched" class="p-error">
+                Ce champ est requis
+              </small>
+              <small *ngIf="registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched" class="p-error">
+                Format d'email invalide
+              </small>
+            </div>
+
+            <!-- Mot de passe -->
+            <div class="p-field mt-3">
+              <label for="password">Mot de passe</label>
+              <div class="p-input-icon-left w-full">
+                <i class="pi pi-lock"></i>
+                <p-password 
+                  id="password" 
+                  formControlName="password" 
+                  [ngClass]="{'ng-invalid ng-dirty': registerForm.get('password')?.invalid && registerForm.get('password')?.touched}"
+                  [toggleMask]="true"
+                  [feedback]="false"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                ></p-password>
+              </div>
+              <small *ngIf="registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched" class="p-error">
+                Ce champ est requis
+              </small>
+              <small *ngIf="registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched" class="p-error">
+                Le mot de passe doit contenir au moins 6 caractères
+              </small>
+            </div>
+
+            <!-- Confirmer mot de passe -->
+            <div class="p-field mt-3">
+              <label for="confirmPassword">Confirmer le mot de passe</label>
+              <div class="p-input-icon-left w-full">
+                <i class="pi pi-lock"></i>
+                <p-password 
+                  id="confirmPassword" 
+                  formControlName="confirmPassword" 
+                  [ngClass]="{'ng-invalid ng-dirty': registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched}"
+                  [toggleMask]="true"
+                  [feedback]="false"
+                  styleClass="w-full"
+                  inputStyleClass="w-full"
+                ></p-password>
+              </div>
+              <small *ngIf="registerForm.get('confirmPassword')?.hasError('required') && registerForm.get('confirmPassword')?.touched" class="p-error">
+                Ce champ est requis
+              </small>
+              <small *ngIf="registerForm.hasError('mismatch') && registerForm.get('confirmPassword')?.touched" class="p-error">
+                Les mots de passe ne correspondent pas
+              </small>
+            </div>
+
+            <!-- Termes et conditions -->
+            <div class="p-field-checkbox mt-3">
+              <p-checkbox 
+                formControlName="termsAccepted" 
+                [binary]="true" 
+                inputId="termsAccepted"
+              ></p-checkbox>
+              <label for="termsAccepted" class="ml-2">J'accepte les <a href="#">termes et conditions</a></label>
+              <div>
+                <small *ngIf="registerForm.get('termsAccepted')?.hasError('required') && registerForm.get('termsAccepted')?.touched" class="p-error">
+                  Vous devez accepter les termes et conditions
+                </small>
+              </div>
+            </div>
+
+            <!-- Display server error message if there is one -->
+            <div *ngIf="errorMessage" class="server-error-message p-error mt-3 text-center">
+              {{ errorMessage }}
+            </div>
+
+            <!-- Display status code if there is one -->
+            <div *ngIf="statusCode" class="status-code-message mt-3 text-center">
+              <span [ngClass]="statusCode >= 200 && statusCode < 300 ? 'status-success' : 'status-error'">
+                Code d'état: {{ statusCode }}
+              </span>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mt-4">
+              <p-button 
+                label="S'inscrire"
+                type="submit" 
+                styleClass="p-button-primary w-full"
+                [loading]="loading"
+                [disabled]="registerForm.invalid || loading"
+              ></p-button>
+            </div>
+          </div>
+        </form>
+
+        <ng-template pTemplate="footer">
+          <div class="card-footer">
+            <p>Vous avez déjà un compte ? <a routerLink="/login" class="login-link">Se connecter</a></p>
+          </div>
+        </ng-template>
+
+      </p-card>
+    </div>
+  </div>
+
+  <p-toast></p-toast>
+</div>

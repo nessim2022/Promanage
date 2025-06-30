@@ -1,0 +1,44 @@
+.language-selector {
+  display: flex;
+  align-items: center;
+  
+  .lang-button {
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    min-width: 40px;
+    
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+}
+
+.language-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .flag-icon {
+    width: 18px;
+    height: 18px;
+    &.fr:before {
+      content: "🇫🇷";
+    }
+    &.en:before {
+      content: "🇬🇧";
+    }
+    &.ar:before {
+      content: "🇸🇦";
+    }
+  }
+  
+  .language-label {
+    font-size: 0.875rem;
+  }
+}
+
+:host-context([dir="rtl"]) {
+  .language-option {
+    flex-direction: row-reverse;
+  }
+}

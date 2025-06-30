@@ -1,0 +1,54 @@
+<!-- src/app/features/project-list/project-list.component.html -->
+<div class="project-list-header">
+  <h2>
+    <i class="pi pi-briefcase"></i> 
+    {{ isAdmin ? 'Tous les projets' : 'Mes projets' }} 
+    <span class="badge">{{ projects.length }}</span>
+  </h2>
+  <div class="header-actions" *ngIf="isAdmin">
+    <button pButton pRipple type="button" label="Nouveau projet" icon="pi pi-plus" 
+            class="p-button-success" [routerLink]="['/projects/new']"></button>
+  </div>
+  <hr />
+</div>
+
+<p-toast></p-toast>
+
+<p-card [header]="isAdmin ? 'Liste complète des projets (Admin)' : 'Liste de mes projets'">
+  <div *ngIf="loading" class="loading-container">
+    <div class="loading-spinner"></div>
+    <span>Chargement des projets...</span>
+  </div>
+  <p-table [value]="projects" [tableStyle]="{ 'min-width': '50rem' }" [rowHover]="true" [loading]="loading">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nom</th>
+        <th>Début</th>
+        <th>Fin</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-project>
+      <tr>
+        <td>
+          <b>{{ project.name }}</b>
+          <span *ngIf="isAdmin" class="project-badge" [ngClass]="{'admin-project': project.userIds.includes(0)}">{{ project.userIds.includes(0) ? 'Admin' : 'Utilisateur' }}</span>
+        </td>
+        <td>{{ project.startDate | date:'dd/MM/yyyy' }}</td>
+        <td>{{ project.endDate | date:'dd/MM/yyyy' }}</td>
+        <td class="action-buttons">
+          <p-button icon="pi pi-pencil" [routerLink]="['/projects/edit',project.projectId]" styleClass="p-button-rounded p-button-warning p-button-sm" pTooltip="Mettre à jour" *ngIf="isAdmin"></p-button>
+          <p-button icon="pi pi-info-circle" [routerLink]="['/projects', project.projectId]" styleClass="p-button-rounded p-button-info p-button-sm" pTooltip="Voir les détails du projet"></p-button>
+          <p-button *ngIf="isAdmin" icon="pi pi-trash" (click)="deleteProject(project.projectId)" styleClass="p-button-rounded p-button-danger p-button-sm" pTooltip="Supprimer le projet"></p-button>
+
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="4" class="text-center">Aucun projet trouvé.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>
+

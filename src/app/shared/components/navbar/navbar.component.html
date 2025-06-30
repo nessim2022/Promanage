@@ -1,0 +1,49 @@
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Logo et nom de la société -->
+    <div class="navbar-brand">
+      <a routerLink="/" class="logo-link">
+        <img src="assets/logo.png" alt="SIGA Logo" class="logo">
+      
+      </a>
+    </div>
+
+    <!-- Section centrale (optionnelle) -->
+    <div class="navbar-center">
+      <div class="search-bar" *ngIf="isLoggedIn()">
+        <i class="pi pi-search search-icon"></i>
+        <input type="text" placeholder="Rechercher..." class="search-input">
+      </div>
+    </div>
+
+    <!-- Menu utilisateur -->
+    <div class="navbar-right">
+      <!-- Afficher uniquement si connecté -->
+      <ng-container *ngIf="isLoggedIn()">
+        <app-language-selector class="language-selector"></app-language-selector>
+        
+        <div class="notifications">
+          <button pButton type="button" icon="pi pi-bell" class="p-button-rounded p-button-text"></button>
+        </div>
+        
+        <div class="user-menu" (click)="menuRef.toggle($event)">
+          <p-avatar 
+           image="assets/proxy-image.png" 
+            [label]="userInitials" 
+            shape="circle" 
+            size="large"
+            styleClass="user-avatar"
+          ></p-avatar>
+          <span class="user-name">{{ userName }}</span>
+          <p-menu #menuRef [model]="userMenuItems" [popup]="true"></p-menu>
+        </div>
+      </ng-container>
+
+      <!-- Si non connecté, afficher boutons login/register -->
+      <div class="auth-buttons" *ngIf="!isLoggedIn()">
+        <button pButton type="button" label="Se connecter" icon="pi pi-sign-in" class="p-button-sm" routerLink="/login"></button>
+        <button pButton type="button" label="S'inscrire" icon="pi pi-user-plus" class="p-button-outlined p-button-sm" routerLink="/register"></button>
+      </div>
+    </div>
+  </div>
+</nav>

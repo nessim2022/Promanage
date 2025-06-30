@@ -1,0 +1,290 @@
+/* src/app/features/dashboard/dashboard.component.scss */
+.p-card {
+  margin: 2rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  
+  .p-table {
+    margin-top: 1rem;
+  }
+}
+
+.dashboard-container {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f9fafc;
+  min-height: calc(100vh - 3rem);
+}
+
+/* Professional Dashboard Header */
+.dashboard-header {
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, #2193b0, #6dd5ed);
+  border-radius: 8px;
+  color: white;
+  padding: 2rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    
+    .header-left {
+      h1 {
+        font-size: 2.2rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 600;
+        color: white;
+      }
+      
+      .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin: 0;
+      }
+    }
+    
+    .header-right {
+      .date-info {
+        display: flex;
+        align-items: center;
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 40px;
+        
+        i {
+          margin-right: 0.5rem;
+          font-size: 1.2rem;
+        }
+        
+        span {
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
+/* Statistics Cards Section */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  
+  .stat-card {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(5px);
+    
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 7px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+      background-color: rgba(255, 255, 255, 0.25);
+      min-width: 50px;
+      height: 50px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 1rem;
+      
+      i {
+        font-size: 1.7rem;
+        color: white;
+      }
+    }
+    
+    .stat-content {
+      display: flex;
+      flex-direction: column;
+      
+      .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      
+      .stat-label {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+    }
+  }
+}
+
+/* Loading Container */
+.loading-container {
+  padding: 2rem;
+  text-align: center;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  
+  .loading-text {
+    margin-top: 1rem;
+    color: #666;
+    font-style: italic;
+  }
+}
+
+/* Error Container */
+.error-container {
+  margin: 2rem 0;
+  
+  .error-card {
+    background-color: #fff9fa;
+    border-left: 4px solid #f44336;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  
+  .error-message {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    
+    i {
+      color: #f44336;
+      font-size: 1.5rem;
+      margin-right: 0.8rem;
+    }
+    
+    span {
+      color: #555;
+      font-size: 1rem;
+    }
+  }
+  
+  .retry-button {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+}
+
+/* No Projects Message */
+.no-projects {
+  margin: 2rem 0;
+  
+  .empty-card {
+    background-color: #f5f9ff;
+    border-left: 4px solid #1976d2;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+  }
+  
+  .empty-message {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    
+    i {
+      color: #1976d2;
+      font-size: 1.8rem;
+      margin-right: 1rem;
+    }
+    
+    span {
+      color: #555;
+      font-size: 1.1rem;
+    }
+  }
+  
+  .create-button {
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+}
+
+/* Projects Table */
+.projects-table {
+  margin-top: 2rem;
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1976d2;
+      margin: 0;
+    }
+  }
+  
+  :host ::ng-deep {
+    .p-card {
+      background-color: white;
+    }
+    
+    .p-card-content {
+      padding: 0;
+    }
+    
+    .p-datatable {
+      margin-top: 0.5rem;
+      
+      th {
+        background-color: #f7f9fc;
+        color: #495057;
+        font-weight: 600;
+      }
+      
+      .p-datatable-tbody > tr {
+        transition: background-color 0.2s;
+        
+        &:hover {
+          background-color: #f2f7ff !important;
+        }
+      }
+    }
+    
+    .p-button.p-button-icon-only {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
+  }
+  
+  .status-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    
+    &.status-completed {
+      background-color: #e6f7ee;
+      color: #27ae60;
+    }
+    
+    &.status-in-progress {
+      background-color: #e6f4fe;
+      color: #2196f3;
+    }
+    
+    &.status-pending {
+      background-color: #fff6e6;
+      color: #f59e0b;
+    }
+    
+    &.status-error {
+      background-color: #feeeee;
+      color: #f44336;
+    }
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+}

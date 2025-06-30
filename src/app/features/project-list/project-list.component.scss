@@ -1,0 +1,145 @@
+/* src/app/features/project-list/project-list.component.scss */
+
+.project-list-header {
+  margin-bottom: 1.5rem;
+  
+  h2 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    
+    .badge {
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 50%;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+  }
+  
+  .header-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+  }
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 1rem;
+  
+  .loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid var(--primary-color);
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+  }
+}
+
+.project-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  background-color: #e9ecef;
+  color: #495057;
+  
+  &.admin-project {
+    background-color: #ffcdd2;
+    color: #c63737;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+:host ::ng-deep {
+  .p-card {
+    margin-bottom: 2rem;
+  }
+  
+  .p-button {
+    margin-right: 0.5rem;
+  }
+  
+  .p-datatable .p-datatable-tbody > tr > td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+  }
+}
+
+  hr {
+    border: none;
+    border-top: 2px solid #007ad9;
+    width: 60px;
+    margin: 0.5rem auto 0 auto;
+  }
+
+.p-card {
+  margin: 2rem auto;
+  max-width: 900px;
+  box-shadow: 0 4px 16px rgba(44, 62, 80, 0.13);
+  border-radius: 12px;
+  .p-table {
+    margin-top: 1rem;
+    .p-button {
+      margin-right: 0.5rem;
+    }
+    tr {
+      transition: background 0.2s;
+      &:hover {
+        background: #f4faff;
+      }
+    }
+    th, td {
+      text-align: center;
+    }
+    th {
+      background: #f6fafd;
+      color: #007ad9;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    td {
+      font-size: 1rem;
+      vertical-align: middle;
+    }
+    .text-center {
+      text-align: center;
+    }
+  }
+}
+
+.p-button {
+  font-size: 0.95rem;
+}
+
+h3 {
+  margin-top: 2.5rem;
+  color: #007ad9;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  .pi {
+    margin-right: 0.4rem;
+  }
+}

@@ -1,0 +1,422 @@
+/* src/app/features/document-list/document-list.component.scss */
+.p-card {
+    margin: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    .p-fileupload {
+      margin-bottom: 1rem;
+    }
+    .p-table {
+      margin-top: 1rem;
+      
+      th {
+        background-color: #F8FAFC;
+        color: #334155;
+        font-weight: 600;
+        padding: 1rem 0.75rem;
+        border-bottom: 2px solid #E2E8F0;
+        transition: background-color 0.2s ease;
+        
+        &:hover {
+          background-color: #F1F5F9;
+        }
+        
+        .p-sortable-column-icon {
+          color: #6366F1;
+        }
+      }
+      
+      tr:hover {
+        background-color: rgba(99, 102, 241, 0.03);
+      }
+    }
+  }
+  
+.document-list-container {
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+.loading-container {
+  margin: 2rem 0;
+  text-align: center;
+  
+  .loading-text {
+    margin-top: 0.5rem;
+    color: #666;
+  }
+}
+
+.error-container {
+  margin: 2rem 0;
+  
+  .error-message {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: #e74c3c;
+    
+    i {
+      font-size: 1.5rem;
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+.documents-section {
+  margin-top: 1rem;
+
+  .empty-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    color: #666;
+    
+    i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #3498db;
+    }
+  }
+}
+
+.upload-form {
+  .form-group {
+    margin-bottom: 1.5rem;
+    
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+    
+    .required-field {
+      color: #e74c3c;
+    }
+    
+    .field-help {
+      display: block;
+      color: #666;
+      margin-top: 0.25rem;
+      font-size: 0.85rem;
+    }
+  }
+  
+  .selected-file {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    
+    .file-info {
+      display: flex;
+      align-items: center;
+    }
+    
+    .file-icon {
+      font-size: 1.5rem;
+      margin-right: 0.75rem;
+    }
+    
+    .file-details {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .file-name {
+      font-weight: 500;
+    }
+    
+    .file-size {
+      font-size: 0.85rem;
+      color: #666;
+    }
+  }
+}
+
+.upload-progress-container {
+  margin: 1rem 0;
+  
+  .upload-status {
+    display: block;
+    text-align: center;
+    margin-top: 0.5rem;
+    color: #666;
+  }
+}
+
+.document-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.file-icon {
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  
+  &.pi-file-pdf {
+    color: #e74c3c;
+    background-color: rgba(231, 76, 60, 0.1);
+  }
+  
+  &.pi-file-excel {
+    color: #27ae60;
+    background-color: rgba(39, 174, 96, 0.1);
+  }
+  
+  &.pi-file-word {
+    color: #3498db;
+    background-color: rgba(52, 152, 219, 0.1);
+  }
+  
+  &.pi-file-powerpoint {
+    color: #e67e22;
+    background-color: rgba(230, 126, 34, 0.1);
+  }
+  
+  &.pi-image {
+    color: #f39c12;
+    background-color: rgba(243, 156, 18, 0.1);
+  }
+  
+  &.pi-link {
+    color: #9b59b6;
+    background-color: rgba(155, 89, 182, 0.1);
+  }
+  
+  &.pi-file {
+    color: #7f8c8d;
+    background-color: rgba(127, 140, 141, 0.1);
+  }
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+// Style pour le texte "Non disponible" dans la colonne des dates
+.not-available {
+  color: #999;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+:host ::ng-deep {
+  .p-fileupload-buttonbar {
+    padding: 0;
+  }
+  
+  .p-fileupload-content {
+    padding: 0;
+    border: none;
+  }
+  
+  .p-button.p-fileupload-choose {
+    width: 100%;
+  }
+}
+
+.document-card {
+  .p-card-body {
+    padding: 0;
+  }
+  
+  .p-card-content {
+    padding: 0;
+  }
+}
+
+.date-container {
+  display: flex;
+  flex-direction: column;
+  
+  .date-value {
+    display: flex;
+    align-items: center;
+    padding: 0.2rem 0;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    
+    i {
+      color: #6366F1;
+      margin-right: 0.5rem;
+      font-size: 1.1rem;
+      background-color: rgba(99, 102, 241, 0.1);
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .date {
+      font-weight: 500;
+      color: #334155;
+    }
+    
+    .time {
+      margin-left: 0.5rem;
+      color: #64748B;
+      font-size: 0.85rem;
+      background-color: rgba(100, 116, 139, 0.08);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+    }
+    
+    &:hover {
+      background-color: rgba(99, 102, 241, 0.05);
+      padding-left: 0.5rem;
+      transform: translateX(2px);
+    }
+  }
+  
+  .not-available {
+    color: #94A3B8;
+    font-style: italic;
+    font-size: 0.85rem;
+    padding: 0.2rem 0;
+  }
+}
+
+.document-title-container {
+  padding: 0.2rem 0;
+}
+
+.document-title {
+  font-weight: 600;
+  color: #1E293B;
+  font-size: 1.05rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid #e0e0e0;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  
+  i {
+    color: #4338CA;
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+  }
+  
+  &:hover {
+    color: #4338CA;
+    background-color: rgba(67, 56, 202, 0.05);
+    padding-left: 0.5rem;
+    transform: translateX(2px);
+  }
+}
+
+.file-name-container {
+  padding: 0.2rem 0;
+}
+
+.file-name {
+  font-size: 0.9rem;
+  color: #475569;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+  display: flex;
+  align-items: center;
+  padding: 0.2rem 0;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  
+  i {
+    color: #64748B;
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+  }
+  
+  &:hover {
+    color: #334155;
+    background-color: rgba(100, 116, 139, 0.05);
+    padding-left: 0.5rem;
+    transform: translateX(2px);
+  }
+}
+
+.p-column-filter {
+  width: 100%;
+  
+  &.p-dropdown {
+    min-width: 8rem;
+  }
+}
+
+.actions-column {
+  text-align: center;
+}
+
+.empty-table-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 0;
+  
+  i {
+    font-size: 3rem;
+    color: #6366F1;
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+    animation: pulse 2s infinite ease-in-out;
+  }
+  
+  p {
+    color: #475569;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    text-align: center;
+    max-width: 80%;
+  }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+.document-summary {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem;
+  color: #64748B;
+  font-size: 0.9rem;
+  
+  .document-count {
+    font-weight: 500;
+  }
+}
+  

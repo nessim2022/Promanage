@@ -1,0 +1,191 @@
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background: linear-gradient(to bottom, #066bb3, #045085);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999;
+  padding-top: 64px; /* Space for navbar */
+
+  &.collapsed {
+    width: 70px;
+    
+    .icon-container {
+      margin-right: 0;
+    }
+    
+    .sidebar-header {
+      padding: 1rem 0;
+      
+      .logo-container {
+        justify-content: center;
+      }
+    }
+    
+    .menu-item {
+      justify-content: center;
+      padding: 0.8rem 0;
+    }
+    
+    .p-badge {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+    }
+  }
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  
+  .logo-container {
+    display: flex;
+    align-items: center;
+    
+    .logo-img {
+      width: 64px;
+      height: 32px;
+      margin-right: 10px;
+    }
+    
+    .app-name {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0;
+      white-space: nowrap;
+    }
+  }
+  
+  .toggle-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    i {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+.menu {
+  flex: 1;
+  padding: 1rem 0;
+  overflow-y: auto;
+  
+  .menu-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    position: relative;
+    
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+    
+    &.active {
+      border-left: 3px solid #ffca28;
+      background-color: rgba(255, 255, 255, 0.15);
+      color: white;
+    }
+    
+    .icon-container {
+      width: 20px;
+      margin-right: 10px;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      
+      i {
+        font-size: 1.1rem;
+      }
+      
+      .p-badge {
+        position: absolute;
+        top: -8px;
+        right: -10px;
+        font-size: 0.7rem;
+        background-color: #ffca28;
+        color: #333;
+        min-width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+    
+    .label {
+      font-size: 0.95rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  
+  .company-info {
+    text-align: center;
+    
+    p {
+      margin: 0.2rem 0;
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+    
+    .version {
+      font-size: 0.75rem;
+      opacity: 0.5;
+    }
+  }
+}
+
+/* Scrollbar styling */
+.menu::-webkit-scrollbar {
+  width: 4px;
+}
+
+.menu::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.menu::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.menu::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}

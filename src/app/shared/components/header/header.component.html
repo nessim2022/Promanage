@@ -1,0 +1,15 @@
+<!-- src/app/shared/components/header/header.component.html -->
+<p-menubar [model]="menuItems">
+  <ng-container *ngIf="currentUser">
+    <span style="margin-right: 1rem;">
+      {{ currentUser.email }}
+      <ng-container *ngIf="currentUser.firstName || currentUser.lastName">
+        ({{ currentUser.firstName || '' }} {{ currentUser.lastName || '' }})
+      </ng-container>
+      <ng-container *ngIf="!currentUser.firstName && !currentUser.lastName && currentUser.email === 'admin@example.com'">
+        (Super Admin)
+      </ng-container>
+    </span>
+  </ng-container>
+  <p-button label="Déconnexion" (click)="logout()" routerLink="/login" styleClass="p-button-secondary"></p-button>
+</p-menubar>
