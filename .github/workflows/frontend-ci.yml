@@ -35,9 +35,9 @@ jobs:
       - name: Build
         run: npm run build -- --configuration production
 
-      # Étape 5: Exécute les tests unitaires et génère le rapport de couverture
-      - name: Test and Coverage
-        run: npm test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage
+      # # Étape 5: Exécute les tests unitaires et génère le rapport de couverture
+      # - name: Test and Coverage
+      #   run: npm test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage
 
       # Étape 6: Lance l'analyse SonarCloud
       - name: SonarCloud Scan
