@@ -18,11 +18,17 @@ export class ProfileComponent implements OnInit {
   editMode = false;
   loading = false;
   error = '';
+  successMessage = '';
 
   constructor(private authService: AuthService, private userService: UserService) {}
 
   ngOnInit(): void {
-    this.user = this.authService.getCurrentUser();
+    const email = this.authService.getCurrentUser()?.email;
+    if (email) {
+      this.userService.getAllUsers().subscribe(users => {
+        this.user = users.find(u => u.email === email) || null;
+      });
+    }
     this.isSuperAdmin = this.authService.isSuperAdmin();
   }
 
@@ -38,9 +44,12 @@ export class ProfileComponent implements OnInit {
         this.user = updated;
         this.editMode = false;
         this.loading = false;
+        this.successMessage = 'Profil modifié avec succès !';
+        this.error = '';
       },
       error: () => {
         this.error = 'Erreur lors de la mise à jour du profil';
+        this.successMessage = '';
         this.loading = false;
       }
     });

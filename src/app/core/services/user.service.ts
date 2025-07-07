@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, tap, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { MessageService } from 'primeng/api';
 
@@ -28,6 +28,7 @@ export interface ProjectMember {
 export interface Role {
   roleId: number;
   roleName: string;
+  accessLevel: number;
 }
 
 @Injectable({
@@ -84,65 +85,51 @@ export class UserService {
       );
   }
   
-  // Récupérer les membres d'un projet spécifique
-  getProjectMembers(projectId: number): Observable<ProjectMember[]> {
-    // Utilisation de ensureValidUrl pour éviter les problèmes d'URL
-    const url = this.ensureValidUrl(`${environment.apiUrl}/projects/${projectId}/members`);
-    console.log(`Récupération des membres pour le projet ${projectId} depuis: ${url}`);
-    
-    return this.http.get<ProjectMember[]>(url, { 
-      headers: this.getHeaders(),
-      withCredentials: true
-    })
+  // Récupérer les membres d'un projet GitLab
+  getProjectMembersByGitlabUrl(gitlabUrl: string): Observable<ProjectMember[]> {
+    // 1. Récupérer l'ID GitLab du projet à partir de l'URL
+    return this.http.get<number>(`/api/gitlab/get-project-id?url=${gitlabUrl}`)
       .pipe(
-        tap(members => {
-          console.log(`Récupération de ${members.length} membres pour le projet ${projectId}`);
-          // Nous n'affichons pas de message de succès ici pour éviter de surcharger l'interface
-        }),
         catchError(error => {
-          console.error(`Erreur lors de la récupération des membres pour le projet ${projectId}:`, error);
-          
-          if (error.status === 0) {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Erreur de connexion',
-              detail: 'Impossible de se connecter au serveur. Veuillez vérifier que le serveur backend est en cours d\'exécution et que le port 8082 est accessible.'
-            });
-            return of([]);
-          } else if (error.status === 404) {
-            this.messageService.add({
-              severity: 'warn',
-              summary: 'Membres non trouvés',
-              detail: `Aucun membre trouvé pour le projet ${projectId}.`
-            });
-            return of([]);
-          } else if (error.status === 403) {
-            this.messageService.add({
-              severity: 'error',
-              summary: 'Accès refusé',
-              detail: 'Vous n\'avez pas les droits nécessaires pour accéder à cette ressource.'
-            });
-            return of([]);
-          }
-          
           this.messageService.add({
             severity: 'error',
             summary: 'Erreur',
-            detail: 'Impossible de charger les membres du projet. Veuillez réessayer.'
+            detail: 'Impossible de récupérer l\'ID GitLab du projet. Vérifiez l\'URL.'
+          });
+          return of(null);
+        }),
+        // 2. Enchaîner la récupération des membres
+        switchMap(gitlabProjectId => {
+          if (!gitlabProjectId) return of([]);
+          const url = `/api/gitlab/project-members?projectId=${gitlabProjectId}`;
+          return this.http.get<ProjectMember[]>(url, {
+            headers: this.getHeaders(),
+            withCredentials: true
+          }).pipe(
+            tap(members => {
+              console.log(`Récupération de ${members.length} membres GitLab pour le projet ${gitlabProjectId}`);
+            }),
+            catchError(error => {
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Erreur',
+                detail: 'Impossible de charger les membres GitLab du projet.'
           });
           return of([]);
+            })
+          );
         })
       );
   }
   
   // Ajouter un utilisateur à un projet
-  addUserToProject(projectId: number, userId: number, role: string): Observable<any> {
-    console.log(`Tentative d'ajout de l'utilisateur ${userId} au projet ${projectId} avec le rôle ${role}`);
+  addUserToProject(projectId: number, userId: number, accessLevel: number): Observable<any> {
+    console.log(`Tentative d'ajout de l'utilisateur ${userId} au projet ${projectId} avec l'accessLevel ${accessLevel}`);
     
-    const data = { userId, role };
+    const data = { projectId, userId, accessLevel };
     
-    // Modification du chemin d'API pour correspondre à la structure attendue par le backend
-    return this.http.post(`${this.apiUrl}/${projectId}/members`, data, { 
+    // Utiliser l'endpoint backend correct
+    return this.http.post(`/api/gitlab/add-member`, data, { 
       headers: this.getHeaders(),
       withCredentials: true,
       observe: 'response'
@@ -172,7 +159,7 @@ export class UserService {
         return throwError(() => error);
       }),
       tap(() => {
-        console.log(`Utilisateur ${userId} ajouté au projet ${projectId} avec le rôle ${role}`);
+        console.log(`Utilisateur ${userId} ajouté au projet ${projectId} avec l'accessLevel ${accessLevel}`);
         this.messageService.add({
           severity: 'success',
           summary: 'Succès',
@@ -266,18 +253,19 @@ export class UserService {
 
   // Get available roles
   getRoles(): Observable<Role[]> {
-    return this.http.get<Role[]>(`${this.apiUrl}/roles`, { headers: this.getHeaders() })
+    const url = this.ensureValidUrl(`${this.apiUrl}/roles`);
+    
+    return this.http.get<Role[]>(url, { headers: this.getHeaders() })
       .pipe(
         tap(roles => console.log(`Fetched ${roles.length} roles`)),
         catchError(error => {
           console.error('Error fetching roles:', error);
-          // Return some default roles in case of error
-          return of([
-            { roleId: 1, roleName: 'Project Manager' },
-            { roleId: 2, roleName: 'Developer' },
-            { roleId: 3, roleName: 'Designer' },
-            { roleId: 4, roleName: 'Tester' }
-          ]);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de charger les rôles disponibles'
+          });
+          return of([]);
         })
       );
   }
@@ -290,6 +278,25 @@ export class UserService {
         catchError(error => {
           console.error(`Error adding role to user:`, error);
           throw error;
+        })
+      );
+  }
+
+  // Récupérer les membres d'un projet
+  getProjectMembers(projectId: number): Observable<ProjectMember[]> {
+    const url = this.ensureValidUrl(`${this.apiUrl}/projects/${projectId}/members`);
+    
+    return this.http.get<ProjectMember[]>(url, { headers: this.getHeaders() })
+      .pipe(
+        tap(members => console.log(`Fetched ${members.length} project members for project ${projectId}`)),
+        catchError(error => {
+          console.error(`Error fetching project members for project ${projectId}:`, error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de charger les membres du projet'
+          });
+          return of([]);
         })
       );
   }

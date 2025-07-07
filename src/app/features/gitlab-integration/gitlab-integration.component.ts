@@ -1,4 +1,3 @@
-
 import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -53,6 +52,24 @@ import { GitlabService } from '../../core/services/gitlab.service';
                 [disabled]="loading || !gitlabUrl"
                 [loading]="loading"
               ></button>
+              <button *ngIf="success && gitlabUrl" 
+                type="button" 
+                pButton 
+                icon="pi pi-external-link" 
+                class="p-button-secondary"
+                style="margin-left: 0.5rem;"
+                (click)="openGitlabUrl()"
+                label="Voir sur GitLab"
+              ></button>
+              <button *ngIf="success && gitlabUrl" 
+                type="button" 
+                pButton 
+                icon="pi pi-users" 
+                class="p-button-info"
+                style="margin-left: 0.5rem;"
+                (click)="showGitlabMembers()"
+                label="Voir les membres GitLab"
+              ></button>
             </div>
           </div>
           
@@ -74,6 +91,18 @@ import { GitlabService } from '../../core/services/gitlab.service';
         
         <div *ngIf="success" class="p-success mt-3">
           {{ successMessage }}
+        </div>
+        
+        <div *ngIf="showMembers && members.length > 0" class="mt-3">
+          <h4>Membres du projet GitLab :</h4>
+          <ul>
+            <li *ngFor="let member of members">
+              {{ member.name }} <span *ngIf="member.username">({{ member.username }})</span>
+            </li>
+          </ul>
+        </div>
+        <div *ngIf="showMembers && members.length === 0" class="mt-3">
+          <span>Aucun membre trouvé pour ce projet GitLab.</span>
         </div>
       </p-card>
       
@@ -101,6 +130,8 @@ export class GitlabIntegrationComponent implements OnInit {
   success: boolean = false;
   errorMessage: string = '';
   successMessage: string = '';
+  members: any[] = [];
+  showMembers: boolean = false;
 
   constructor(
     private messageService: MessageService,
@@ -202,6 +233,24 @@ export class GitlabIntegrationComponent implements OnInit {
           this.error = true;
           this.errorMessage = 'La synchronisation a échoué. Veuillez réessayer plus tard.';
         }
+      });
+  }
+
+  openGitlabUrl() {
+    if (this.gitlabUrl) {
+      window.open(this.gitlabUrl, '_blank');
+    }
+  }
+
+  showGitlabMembers() {
+    this.showMembers = false;
+    this.members = [];
+    this.loading = true;
+    this.gitlabService.validateGitlabUrl(this.gitlabUrl)
+      .pipe(finalize(() => this.loading = false))
+      .subscribe(members => {
+        this.members = members;
+        this.showMembers = true;
       });
   }
 }

@@ -290,9 +290,9 @@ export class DocumentListComponent implements OnInit, OnDestroy {
     this.uploading = true;
     
     this.documentService.uploadDocument(
-      this.projectId, 
       this.uploadedFile, 
-      this.documentTitle || this.uploadedFile.name
+      this.documentTitle || this.uploadedFile.name,
+      this.projectId
     ).pipe(
       catchError(error => {
         // console.error('Erreur lors du téléchargement du document:', error);
@@ -524,7 +524,7 @@ export class DocumentListComponent implements OnInit, OnDestroy {
         }
       });
     } else {
-      this.documentService.uploadDocument(this.projectId, this.uploadedFile, this.documentTitle).pipe(
+      this.documentService.uploadDocument(this.uploadedFile, this.documentTitle, this.projectId).pipe(
         catchError(error => {
           console.error('Erreur lors du téléchargement:', error);
           this.error = true;

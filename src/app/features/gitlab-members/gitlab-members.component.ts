@@ -58,9 +58,9 @@ interface AddMemberRequest {
       <!-- En-tête de section -->
       <div class="section-header">
         <h2>Membres GitLab</h2>
-        <button pButton pRipple type="button" icon="pi pi-plus" label="Ajouter un membre" 
+        <!-- <button pButton pRipple type="button" icon="pi pi-plus" label="Ajouter un membre" 
                 class="p-button-primary" (click)="openAddMemberDialog()" 
-                *ngIf="authService.isSuperAdmin()"></button>
+                *ngIf="authService.isSuperAdmin()"></button> -->
       </div>
       
       <!-- Indicateur de chargement -->
@@ -347,6 +347,7 @@ export class GitlabMembersComponent implements OnInit {
   addMemberDialog: boolean = false;
   newMemberEmail: string = '';
   selectedAccessLevel: number | null = null;
+  selectedGitlabUserId: number | null = null;
   saving: boolean = false;
   
   // Dialog de modification du niveau d'accès
@@ -447,52 +448,60 @@ export class GitlabMembersComponent implements OnInit {
   }
 
   addMember() {
-    if (!this.newMemberEmail || !this.selectedAccessLevel) {
+    if (!this.selectedGitlabUserId || !this.selectedAccessLevel) {
       this.messageService.add({
         severity: 'error',
         summary: 'Erreur',
-        detail: 'Veuillez remplir tous les champs obligatoires.'
+        detail: 'Veuillez sélectionner un utilisateur GitLab et un niveau d\'accès.'
       });
       return;
     }
-    
     this.saving = true;
-    
-    // Préparer la requête d'ajout de membre
-    const request: AddMemberRequest = {
-      projectId: this.projectId,
-      userId: 0, // Sera résolu par le backend à partir de l'email
-      accessLevel: this.selectedAccessLevel
-    };
-    
-    // Appel à l'API pour ajouter le membre
-    this.http.post<any>(`/api/gitlab/add-member`, {
-      ...request,
-      email: this.newMemberEmail
-    })
-      .pipe(
-        catchError(error => {
-          console.error('Erreur lors de l\'ajout du membre:', error);
+    // 1. Récupérer l'ID GitLab du projet à partir de l'URL
+    this.http.get<number>(`/api/gitlab/get-project-id?url=${this.gitlabUrl}`)
+      .subscribe({
+        next: (gitlabProjectId) => {
+          const payload = {
+            projectId: gitlabProjectId,
+            userId: this.selectedGitlabUserId,
+            accessLevel: this.selectedAccessLevel
+          };
+          console.log('Payload envoyé:', payload);
+          // 2. Appeler l'API d'ajout de membre
+          this.http.post<any>(`/api/gitlab/add-member`, payload)
+            .pipe(
+              catchError(error => {
+                console.error('Erreur lors de l\'ajout du membre:', error);
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Erreur',
+                  detail: error.error?.message || 'Impossible d\'ajouter le membre. Veuillez réessayer.'
+                });
+                return of(null);
+              }),
+              finalize(() => {
+                this.saving = false;
+              })
+            )
+            .subscribe(response => {
+              if (response) {
+                this.messageService.add({
+                  severity: 'success',
+                  summary: 'Succès',
+                  detail: 'Membre ajouté avec succès'
+                });
+                this.addMemberDialog = false;
+                this.loadMembers();
+              }
+            });
+        },
+        error: (err) => {
+          this.saving = false;
           this.messageService.add({
             severity: 'error',
             summary: 'Erreur',
-            detail: error.error?.message || 'Impossible d\'ajouter le membre. Veuillez réessayer.'
+            detail: 'Impossible de récupérer l\'ID GitLab du projet. Vérifiez l\'URL.'
           });
-          return of(null);
-        }),
-        finalize(() => {
-          this.saving = false;
-        })
-      )
-      .subscribe(response => {
-        if (response) {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Succès',
-            detail: 'Membre ajouté avec succès'
-          });
-          this.addMemberDialog = false;
-          this.loadMembers(); // Recharger la liste des membres
         }
       });
   }

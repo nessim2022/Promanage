@@ -214,7 +214,7 @@
       <p-tabPanel header="Membres">
         <div class="tab-content">
           <div *ngIf="project && project.projectId > 0; else noProjectMembers">
-            <app-project-members [projectId]="project.projectId"></app-project-members>
+            <app-project-members [projectId]="project.projectId" [project]="project"></app-project-members>
           </div>
           <ng-template #noProjectMembers>
             <div class="loading-placeholder">

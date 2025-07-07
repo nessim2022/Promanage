@@ -12,6 +12,12 @@ import { MessageService } from 'primeng/api';
 export class DocumentService {
   private apiUrl = environment.apiUrl;
   private alfrescoUrl = environment.alfrescoUrl;
+  gitlabMembers: any[] = [];
+  selectedGitlabUser: number | null = null;
+  gitlabProjectId: number | null = null;
+  selectedGitLabAccessLevel: number | null = null;
+  gitlabProjectIdLoading: boolean = false;
+  savingGitLab: boolean = false;
 
   constructor(
     private http: HttpClient,
@@ -102,14 +108,8 @@ export class DocumentService {
 
   checkAlfrescoAvailability(): Observable<boolean> {
     // Utilisation de l'URL correcte pour vérifier la disponibilité d'Alfresco
-    // S'assurer que l'URL ne se termine pas par ':'
-    const alfrescoUrl = environment.alfrescoUrl.endsWith(':') 
-      ? environment.alfrescoUrl.slice(0, -1) 
-      : environment.alfrescoUrl;
-    
-    const statusUrl = `${alfrescoUrl}/status`;
+    const statusUrl = `${environment.alfrescoUrl}/status`;
     console.log('Vérification de la disponibilité du service Alfresco sur:', statusUrl);
-    
     return this.http.get<any>(statusUrl, {
       headers: this.getHeaders(),
       withCredentials: true
@@ -122,29 +122,16 @@ export class DocumentService {
     );
   }
 
-  uploadDocument(projectId: number, file: File, title: string): Observable<any> {
-    if (projectId <= 0) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur',
-        detail: 'Aucun projet sélectionné. Veuillez spécifier un projet.'
-      });
-      return throwError(() => new Error('Aucun projet sélectionné'));
-    }
-
+  uploadDocument(file: File, title: string, projectId: number): Observable<any> {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('title', title);
-    formData.append('projectId', projectId.toString());
 
-    const uploadUrl = `${this.apiUrl}/documents/upload`;
+    // Utiliser la configuration d'environnement pour l'URL Alfresco
+    const uploadUrl = `${environment.backendUrl}${environment.alfrescoUrl}/upload/${projectId}?title=${encodeURIComponent(title)}`;
     console.log(`Tentative de téléversement vers: ${uploadUrl}`);
 
-    return this.http.post(uploadUrl, formData, {
-      headers: this.getHeaders(),
-      withCredentials: true
-    }).pipe(
-      timeout(30000),
+    return this.http.post(uploadUrl, formData).pipe(
       tap(response => {
         console.log('Document téléversé avec succès:', response);
         this.messageService.add({
@@ -155,7 +142,12 @@ export class DocumentService {
       }),
       catchError(error => {
         console.error('Erreur lors du téléversement:', error);
-        return this.handleSessionExpired(error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Erreur lors du téléversement du document.'
+        });
+        return throwError(() => error);
       })
     );
   }
@@ -330,5 +322,87 @@ export class DocumentService {
         return this.handleSessionExpired(error);
       })
     );
+  }
+
+  loadGitlabMembers() {
+    this.http.get<any[]>(`/api/gitlab/project-members?projectId=${this.gitlabProjectId}`)
+      .subscribe(members => {
+        this.gitlabMembers = members;
+      });
+  }
+
+  addGitLabMember() {
+    if (!this.gitlabProjectId || !this.selectedGitlabUser || !this.selectedGitLabAccessLevel) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erreur',
+        detail: 'Veuillez remplir tous les champs obligatoires'
+      });
+      return;
+    }
+    
+    this.savingGitLab = true;
+    
+    this.http.post('/api/gitlab/add-member', {
+      projectId: this.gitlabProjectId,
+      userId: this.selectedGitlabUser,
+      accessLevel: this.selectedGitLabAccessLevel
+    })
+    .subscribe(
+      () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Membre ajouté avec succès à GitLab.'
+        });
+      },
+      err => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible d\'ajouter le membre à GitLab. Vérifiez les informations et réessayez.'
+        });
+      }
+    );
+  }
+
+  getGitlabProjectIdFromUrl(url: string) {
+    this.gitlabProjectId = null;
+    this.gitlabProjectIdLoading = true;
+    this.http.get<{ projectId: number }>(`/api/gitlab/get-project-id?url=${encodeURIComponent(url)}`)
+      .subscribe(
+        res => {
+          console.log('Réponse get-project-id:', res);
+          this.gitlabProjectId = res.projectId;
+          this.gitlabProjectIdLoading = false;
+          this.loadGitlabMembers();
+        },
+        err => {
+          this.gitlabProjectId = null;
+          this.gitlabProjectIdLoading = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de récupérer l\'ID du projet GitLab. Vérifiez l\'URL.'
+          });
+        }
+      );
+  }
+
+  onGitlabProjectUrlChange(url: string) {
+    this.http.get<{ projectId: number }>(`/api/gitlab/get-project-id?url=${encodeURIComponent(url)}`)
+      .subscribe({
+        next: (res) => {
+          this.gitlabProjectId = res.projectId;
+        },
+        error: () => {
+          this.gitlabProjectId = null;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de récupérer l\'ID du projet GitLab.'
+          });
+        }
+      });
   }
 }

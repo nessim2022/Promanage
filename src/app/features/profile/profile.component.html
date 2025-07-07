@@ -1,5 +1,6 @@
 <div class="profile-container">
   <h2>Mon profil</h2>
+  <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}</div>
   <div *ngIf="error" class="error">{{ error }}</div>
   <div *ngIf="user">
     <form *ngIf="editMode && isSuperAdmin; else viewMode" class="profile-form">
@@ -32,9 +33,9 @@
       </div>
     </form>
     <ng-template #viewMode>
-      <p><strong>Nom :</strong> {{ user?.lastName }}</p>
-      <p><strong>Prénom :</strong> {{ user?.firstName }}</p>
-      <p><strong>Email :</strong> {{ user?.email }}</p>
+      <p><strong>Nom :</strong> {{ user.lastName }}</p>
+      <p><strong>Prénom :</strong> {{ user.firstName }}</p>
+      <p><strong>Email :</strong> {{ user.email }}</p>
       <p><strong>Rôles :</strong> <span *ngFor="let role of user?.roles; let last = last">{{ role.roleName }}<span *ngIf="!last">, </span></span></p>
       <p-button 
         *ngIf="isSuperAdmin" 

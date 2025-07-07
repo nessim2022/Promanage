@@ -448,7 +448,7 @@ export class AllDocumentsComponent implements OnInit {
     formData.append('title', this.documentTitle || this.uploadedFile.name);
     formData.append('projectId', this.selectedProjectId.toString());
 
-    this.documentService.uploadDocument(this.selectedProjectId, this.uploadedFile, this.documentTitle || (this.uploadedFile ? this.uploadedFile.name : '')).pipe(
+    this.documentService.uploadDocument(this.uploadedFile, this.documentTitle, this.selectedProjectId).pipe(
       catchError(error => {
         console.error('Erreur lors du téléchargement du document:', error);
         this.messageService.add({

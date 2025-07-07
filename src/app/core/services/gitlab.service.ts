@@ -115,12 +115,8 @@ export class GitlabService {
     // Utiliser l'URL complète avec le paramètre de requête
     console.log('Validation de l\'URL GitLab:', url);
     
-    // Ajouter des en-têtes d'authentification
-    const headers = {
-      ...this.getHeaders(),
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    };
+    // Créer correctement les headers
+    const headers = this.getHeaders().set('Accept', 'application/json');
     
     console.log('En-têtes de la requête:', headers);
     

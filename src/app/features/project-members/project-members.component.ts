@@ -16,6 +16,7 @@ import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { InputTextModule } from 'primeng/inputtext';
 import { HttpClient } from '@angular/common/http';
+import { DocumentService } from '../../core/services/document.service';
 
 @Component({
   selector: 'app-project-members',
@@ -46,16 +47,16 @@ import { HttpClient } from '@angular/common/http';
         <div class="header-buttons">
           <button *ngIf="authService.isSuperAdmin()" pButton pRipple type="button" icon="pi pi-plus" label="Ajouter un membre" 
                   class="p-button-primary" (click)="openAddMemberDialog()"></button>
-          <button *ngIf="authService.isSuperAdmin()" pButton pRipple type="button" icon="pi pi-github" label="Ajouter un membre GitLab" 
-                  class="p-button-secondary ml-2" (click)="openAddGitLabMemberDialog()"></button>
+          <!-- <button *ngIf="authService.isSuperAdmin()" pButton pRipple type="button" icon="pi pi-github" label="Ajouter un membre GitLab" 
+                  class="p-button-secondary ml-2" (click)="openAddGitLabMemberDialog()"></button> -->
         </div>
       </div>
       
       <!-- Indicateur de chargement -->
-      <div *ngIf="loading" class="loading-container">
+      <!-- <div *ngIf="loading" class="loading-container">
         <p-progressBar mode="indeterminate"></p-progressBar>
         <div class="loading-text">Chargement des membres...</div>
-      </div>
+      </div> -->
       
       <!-- Message d'erreur -->
       <div *ngIf="error && !loading" class="error-container">
@@ -71,15 +72,15 @@ import { HttpClient } from '@angular/common/http';
       <!-- Liste des membres -->
       <div *ngIf="!loading && !error" class="members-section">
         <!-- Aucun membre -->
-        <div *ngIf="members.length === 0" class="no-members">
+        <!-- <div *ngIf="members.length === 0" class="no-members">
           <div class="empty-message">
             <i class="pi pi-info-circle"></i>
             <span>Aucun membre dans ce projet.</span>
           </div>
-        </div>
+        </div> -->
         
         <!-- Table des membres -->
-        <div *ngIf="members.length > 0" class="members-table">
+        <!-- <div *ngIf="members.length > 0" class="members-table">
           <p-table [value]="members" [paginator]="true" [rows]="5"
                   styleClass="p-datatable-striped" responsiveLayout="scroll">
             <ng-template pTemplate="header">
@@ -111,7 +112,7 @@ import { HttpClient } from '@angular/common/http';
             </ng-template>
           </p-table>
         </div>
-      </div>
+      </div> -->
       
       <!-- Dialog d'ajout de membre -->
       <p-dialog [(visible)]="addMemberDialog" [style]="{width: '500px'}" header="Ajouter un membre" 
@@ -197,20 +198,28 @@ import { HttpClient } from '@angular/common/http';
                 [modal]="true" [closable]="!savingGitLab" [closeOnEscape]="!savingGitLab"
                 [blockScroll]="true" styleClass="p-fluid">
         <div class="member-form">
+          <div *ngIf="gitlabMembers.length === 0" class="empty-message">
+            <i class="pi pi-info-circle"></i>
+            <span>Aucun utilisateur GitLab trouvé pour ce projet.</span>
+          </div>
           <div class="form-group">
             <label for="gitlabProjectUrl">URL du projet GitLab <span class="required-field">*</span></label>
             <input id="gitlabProjectUrl" type="text" pInputText [(ngModel)]="gitlabProjectUrl" 
-                   placeholder="https://gitlab.com/votre-groupe/votre-projet" [disabled]="savingGitLab" />
+                   placeholder="https://gitlab.com/votre-groupe/votre-projet" [disabled]="savingGitLab"
+                   (blur)="onGitlabProjectUrlChange(gitlabProjectUrl)" />
             <small class="field-help">Entrez l'URL du projet GitLab.</small>
           </div>
-
           <div class="form-group">
-            <label for="gitlabUserId">ID utilisateur GitLab <span class="required-field">*</span></label>
-            <input id="gitlabUserId" type="text" pInputText [(ngModel)]="gitlabUserId" 
-                   placeholder="ID ou nom d'utilisateur GitLab" [disabled]="savingGitLab" />
-            <small class="field-help">Entrez l'ID ou le nom d'utilisateur GitLab.</small>
+            <label for="gitlabUserSelect">Utilisateur GitLab <span class="required-field">*</span></label>
+            <p-dropdown id="gitlabUserSelect"
+                        [options]="gitlabMembers"
+                        [(ngModel)]="selectedGitlabUser"
+                        optionLabel="email"
+                        optionValue="userId"
+                        placeholder="Sélectionner un utilisateur"
+                        (onChange)="onGitlabUserChange($event.value)"></p-dropdown>
+            <small class="field-help">Sélectionnez l'utilisateur GitLab à ajouter.</small>
           </div>
-          
           <div class="form-group">
             <label for="gitlabAccessLevel">Niveau d'accès <span class="required-field">*</span></label>
             <p-dropdown id="gitlabAccessLevel" [options]="gitlabAccessLevels" 
@@ -218,23 +227,23 @@ import { HttpClient } from '@angular/common/http';
                        optionLabel="label"
                        optionValue="value"
                        placeholder="Sélectionner un niveau d'accès"
-                       [disabled]="savingGitLab"></p-dropdown>
+                       [disabled]="savingGitLab"
+                       (onChange)="onAccessLevelChange($event.value)"></p-dropdown>
             <small class="field-help">Sélectionnez le niveau d'accès de l'utilisateur dans ce projet GitLab.</small>
           </div>
-          
           <!-- Indicateur de progression -->
           <div *ngIf="savingGitLab" class="progress-container">
             <p-progressBar mode="indeterminate"></p-progressBar>
             <span class="progress-status">Traitement en cours...</span>
           </div>
+          <div>projectId = {{ gitlabProjectId }}, userId = {{ gitlabUserId }}, accessLevel = {{ selectedGitLabAccessLevel }}</div>
         </div>
-        
         <ng-template pTemplate="footer">
           <button pButton pRipple type="button" icon="pi pi-times" label="Annuler" 
                   class="p-button-text" (click)="addGitLabMemberDialog = false" [disabled]="savingGitLab"></button>
           <button pButton pRipple type="button" icon="pi pi-plus" label="Ajouter" 
                   class="p-button-primary" (click)="addGitLabMember()" 
-                  [disabled]="!gitlabProjectUrl || !gitlabUserId || !selectedGitLabAccessLevel || savingGitLab">
+                  [disabled]="!gitlabProjectId || !gitlabUserId || !selectedGitLabAccessLevel || savingGitLab">
           </button>
         </ng-template>
       </p-dialog>
@@ -365,6 +374,7 @@ import { HttpClient } from '@angular/common/http';
 })
 export class ProjectMembersComponent implements OnInit {
   @Input() projectId!: number;
+  @Input() project: any;
   
   members: ProjectMember[] = [];
   availableUsers: User[] = [];
@@ -397,12 +407,22 @@ export class ProjectMembersComponent implements OnInit {
     { label: 'Owner', value: 50 }
   ];
 
+  gitlabMembers: any[] = [];
+  selectedGitlabUser: any = null;
+
+  gitlabProjectId: number | null = null;
+
+  selectedFile: File | null = null;
+  documentTitle: string = '';
+  selectedProjectId: number | null = null;
+
   constructor(
     private userService: UserService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private http: HttpClient,
-    public authService: AuthService
+    public authService: AuthService,
+    private documentService: DocumentService
   ) {}
 
   ngOnInit() {
@@ -438,7 +458,7 @@ export class ProjectMembersComponent implements OnInit {
         next: (data) => {
           this.members = data;
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Erreur lors du chargement des membres du projet:', err);
           this.error = true;
           
@@ -474,7 +494,11 @@ export class ProjectMembersComponent implements OnInit {
     this.userService.getRoles()
       .subscribe({
         next: (roles) => {
-          this.roles = roles;
+          // S'assurer que chaque rôle a un accessLevel numérique
+          this.roles = roles.map(r => ({
+            ...r,
+            accessLevel: typeof r.accessLevel === 'number' ? r.accessLevel : this.getAccessLevelForRoleName(r.roleName)
+          }));
         },
         error: (err) => {
           console.error('Failed to load roles:', err);
@@ -487,7 +511,32 @@ export class ProjectMembersComponent implements OnInit {
       });
   }
 
-  openAddMemberDialog() {
+  // Fonction utilitaire pour mapper roleName -> accessLevel
+  getAccessLevelForRoleName(roleName: string): number {
+    switch (roleName) {
+      case 'Guest': return 10;
+      case 'Reporter': return 20;
+      case 'Developer': return 30;
+      case 'Maintainer': return 40;
+      case 'Owner': return 50;
+      default: return 30; // Par défaut Developer
+    }
+  }
+
+  // Méthodes publiques pour le template
+  public openAddMemberDialog() { this._openAddMemberDialog(); }
+  public openAddGitLabMemberDialog() { this._openAddGitLabMemberDialog(); }
+  public openEditRoleDialog(member: ProjectMember) { this._openEditRoleDialog(member); }
+  public confirmRemoveMember(member: ProjectMember) { this._confirmRemoveMember(member); }
+  public addMember() { this._addMember(); }
+  public updateMemberRole() { this._updateMemberRole(); }
+  public onGitlabProjectUrlChange(url: string) { this._onGitlabProjectUrlChange(url); }
+  public onGitlabUserChange(userId: number) { this._onGitlabUserChange(userId); }
+  public onAccessLevelChange(level: number) { this._onAccessLevelChange(level); }
+  public addGitLabMember() { this._addGitLabMember(); }
+
+  // Implémentations privées (préfixées par _)
+  private _openAddMemberDialog() {
     if (!this.authService.isSuperAdmin()) {
       this.messageService.add({
         severity: 'error',
@@ -498,11 +547,15 @@ export class ProjectMembersComponent implements OnInit {
     }
     this.selectedUser = null;
     this.selectedRole = null;
+    // Initialiser automatiquement l'URL GitLab du projet si disponible
+    if ((this as any).project && (this as any).project.gitlabURL) {
+      this.gitlabProjectUrl = (this as any).project.gitlabURL;
+    }
     this.addMemberDialog = true;
     this.loadAvailableUsers();
   }
 
-  openAddGitLabMemberDialog() {
+  private _openAddGitLabMemberDialog() {
     if (!this.authService.isSuperAdmin()) {
       this.messageService.add({
         severity: 'error',
@@ -514,17 +567,50 @@ export class ProjectMembersComponent implements OnInit {
     this.gitlabProjectUrl = '';
     this.gitlabUserId = '';
     this.selectedGitLabAccessLevel = null;
+    this.selectedGitlabUser = null;
+    this.gitlabMembers = [];
     this.addGitLabMemberDialog = true;
+    // Appel à l'API /api/users pour remplir la liste
+    this.http.get<any[]>('/api/users').subscribe({
+      next: (users) => {
+        this.gitlabMembers = users;
+      },
+      error: (err) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de charger la liste des utilisateurs GitLab.'
+        });
+      }
+    });
   }
 
-  openEditRoleDialog(member: ProjectMember) {
+  private _openEditRoleDialog(member: ProjectMember) {
     this.selectedMember = member;
-    // Find the role object that matches the member's role
-    this.selectedRole = this.roles.find(r => r.roleName === member.role) || null;
+    this.selectedRole = this.roles.find((r: any) => r.roleName === member.role) || null;
     this.editRoleDialog = true;
   }
 
-  addMember() {
+  private _confirmRemoveMember(member: ProjectMember) {
+    if (!this.authService.isSuperAdmin()) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Accès refusé',
+        detail: 'Seul le super administrateur peut supprimer des membres du projet.'
+      });
+      return;
+    }
+    this.confirmationService.confirm({
+      message: `Êtes-vous sûr de vouloir retirer ${member.firstName} ${member.lastName} du projet ?`,
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.removeMember(member);
+      }
+    });
+  }
+
+  private _addMember() {
     if (!this.selectedUser || !this.selectedRole) {
       this.messageService.add({
         severity: 'error',
@@ -536,68 +622,47 @@ export class ProjectMembersComponent implements OnInit {
     
     this.saving = true;
     
-    this.userService.addUserToProject(this.projectId, this.selectedUser.userId, this.selectedRole.roleName)
-      .pipe(
-        finalize(() => {
-          this.saving = false;
-        })
-      )
-      .subscribe({
-        next: () => {
-          // Le message de succès est déjà affiché par le service utilisateur
-          this.addMemberDialog = false;
-          this.loadMembers();
-        },
-        error: (err) => {
-          console.error('Failed to add member:', err);
-          // Le message d'erreur est déjà affiché par le service utilisateur
-        }
-      });
-  }
-
-  addGitLabMember() {
-    if (!this.gitlabProjectUrl || !this.gitlabUserId || !this.selectedGitLabAccessLevel) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Erreur',
-        detail: 'Veuillez remplir tous les champs obligatoires'
-      });
-      return;
-    }
-    
-    this.savingGitLab = true;
-    
-    // Appel à l'API pour ajouter le membre à GitLab
-    this.http.post('/api/gitlab/add-member', {
+    this.http.post('/api/gitlab/add-member-by-url', {
       projectUrl: this.gitlabProjectUrl,
-      userId: this.gitlabUserId,
-      accessLevel: this.selectedGitLabAccessLevel
-    }).pipe(
+      userId: this.selectedUser.userId,
+      accessLevel: this.selectedRole.accessLevel
+    })
+    .pipe(
       catchError(error => {
-        console.error('Erreur lors de l\'ajout du membre GitLab:', error);
+        console.error('Erreur lors de l\'ajout du membre :', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: error.error?.message || 'Impossible d\'ajouter le membre à GitLab. Veuillez réessayer.'
+          detail: error.error?.message || 'Impossible d\'ajouter le membre. Veuillez réessayer.'
         });
         return of(null);
       }),
       finalize(() => {
-        this.savingGitLab = false;
+        this.saving = false;
       })
-    ).subscribe(response => {
-      if (response) {
+    ).subscribe({
+      next: (response) => {
+        console.log('Réponse de l\'API add-member-by-url:', response);
         this.messageService.add({
           severity: 'success',
           summary: 'Succès',
-          detail: 'Membre ajouté à GitLab avec succès'
+          detail: 'Membre ajouté avec succès'
         });
-        this.addGitLabMemberDialog = false;
+        this.addMemberDialog = false;
+        this.loadMembers();
+      },
+      error: (error) => {
+        console.error('Erreur lors de l\'ajout du membre :', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: error.error?.message || 'Impossible d\'ajouter le membre. Veuillez réessayer.'
+        });
       }
     });
   }
 
-  updateMemberRole() {
+  private _updateMemberRole() {
     if (!this.authService.isSuperAdmin()) {
       this.messageService.add({
         severity: 'error',
@@ -618,6 +683,7 @@ export class ProjectMembersComponent implements OnInit {
     this.saving = true;
     
     // First remove the user then add them again with the new role
+    if (this.selectedMember && this.selectedMember.userId) {
     this.userService.removeUserFromProject(this.projectId, this.selectedMember.userId)
       .pipe(
         catchError(error => {
@@ -626,7 +692,7 @@ export class ProjectMembersComponent implements OnInit {
         })
       )
       .subscribe(() => {
-        this.userService.addUserToProject(this.projectId, this.selectedMember!.userId, this.selectedRole!.roleName)
+          this.userService.addUserToProject(this.projectId, this.selectedMember!.userId, this.selectedRole!.accessLevel)
           .pipe(
             finalize(() => {
               this.saving = false;
@@ -638,29 +704,88 @@ export class ProjectMembersComponent implements OnInit {
               this.editRoleDialog = false;
               this.loadMembers();
             },
-            error: (err) => {
+              error: (err: any) => {
               console.error('Failed to update role:', err);
               // Le message d'erreur est déjà affiché par le service utilisateur
             }
           });
       });
+    }
   }
 
-  confirmRemoveMember(member: ProjectMember) {
-    if (!this.authService.isSuperAdmin()) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Accès refusé',
-        detail: 'Seul le super administrateur peut supprimer des membres du projet.'
+  private _onGitlabProjectUrlChange(url: string): void {
+    this.gitlabProjectId = null;
+    if (!url) return;
+    this.http.get<{ projectId: number }>(`/api/gitlab/get-project-id?url=${encodeURIComponent(url)}`)
+      .subscribe({
+        next: (res: any) => {
+          this.gitlabProjectId = res.projectId;
+        },
+        error: () => {
+          this.gitlabProjectId = null;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erreur',
+            detail: 'Impossible de récupérer l\'ID du projet GitLab.'
+          });
+        }
       });
+  }
+
+  private _onGitlabUserChange(userId: number) {
+    this.documentService.selectedGitlabUser = userId;
+  }
+
+  private _onAccessLevelChange(level: number) {
+    this.documentService.selectedGitLabAccessLevel = +level;
+  }
+
+  private _addGitLabMember() {
+    if (!this.gitlabMembers || this.gitlabMembers.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Aucun membre GitLab',
+        detail: 'Aucun utilisateur GitLab n\'a été trouvé pour ce projet.'
+      });
+      this.savingGitLab = false;
       return;
     }
-    this.confirmationService.confirm({
-      message: `Êtes-vous sûr de vouloir retirer ${member.firstName} ${member.lastName} du projet ?`,
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.removeMember(member);
+    this.savingGitLab = true;
+    this.http.post('/api/gitlab/add-member-by-url', {
+      projectUrl: this.gitlabProjectUrl,
+      userId: this.gitlabUserId,
+      accessLevel: this.selectedGitLabAccessLevel
+    })
+    .pipe(
+      catchError(error => {
+        console.error('Erreur lors de l\'ajout du membre GitLab:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: error.error?.message || 'Impossible d\'ajouter le membre à GitLab. Veuillez réessayer.'
+        });
+        return of(null);
+      }),
+      finalize(() => {
+        this.savingGitLab = false;
+      })
+    ).subscribe({
+      next: (response) => {
+        console.log('Réponse de l\'API add-member-by-url (GitLab):', response);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: 'Membre ajouté à GitLab avec succès'
+        });
+        this.addGitLabMemberDialog = false;
+      },
+      error: (error) => {
+        console.error('Erreur lors de l\'ajout du membre GitLab :', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: error.error?.message || 'Impossible d\'ajouter le membre à GitLab. Veuillez réessayer.'
+        });
       }
     });
   }
@@ -669,13 +794,25 @@ export class ProjectMembersComponent implements OnInit {
     this.userService.removeUserFromProject(this.projectId, member.userId)
       .subscribe({
         next: () => {
-          // Le message de succès est déjà affiché par le service utilisateur
           this.loadMembers();
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Failed to remove member:', err);
-          // Le message d'erreur est déjà affiché par le service utilisateur
         }
       });
+  }
+
+  onUpload() {
+    if (this.selectedFile && this.documentTitle && this.selectedProjectId) {
+      this.documentService.uploadDocument(this.selectedFile, this.documentTitle, this.selectedProjectId)
+        .subscribe({
+          next: (res) => {
+            // succès
+          },
+          error: (err) => {
+            // gestion erreur
+          }
+        });
+    }
   }
 }

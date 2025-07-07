@@ -1,4 +1,33 @@
 module.exports = {
+  '/alfresco2': {
+    target: 'http://localhost:8082',
+    secure: false,
+    changeOrigin: true,
+    logLevel: 'debug',
+    onProxyRes: function(proxyRes, req, res) {
+      proxyRes.headers['Access-Control-Allow-Origin'] = '*';
+      proxyRes.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS';
+      proxyRes.headers['Access-Control-Allow-Headers'] = 'Origin, X-Requested-With, Content-Type, Accept, Authorization';
+    },
+    onProxyReq: function(proxyReq, req, res) {
+      if (req.method === 'OPTIONS') {
+        res.writeHead(200, {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+          'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
+          'Access-Control-Max-Age': '86400'
+        });
+        res.end();
+        return;
+      }
+    }
+  },
+  '/alfresco': {
+    target: 'http://localhost:8080',
+    secure: false,
+    changeOrigin: true,
+    logLevel: 'debug'
+  },
   '/api': {
     target: 'http://localhost:8082',
     secure: false,
@@ -45,18 +74,6 @@ module.exports = {
         return;
       }
     }
-  },
-  '/alfresco': {
-    target: 'http://localhost:8080',
-    secure: false,
-    changeOrigin: true,
-    logLevel: 'debug'
-  },
-  '/alfresco2': {
-    target: 'http://localhost:8080',
-    secure: false,
-    changeOrigin: true,
-    logLevel: 'debug'
   },
   '/najeh': {
     target: 'http://localhost:8082',

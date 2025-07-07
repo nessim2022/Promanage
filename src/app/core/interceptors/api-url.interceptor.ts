@@ -14,6 +14,12 @@ export class ApiUrlInterceptor implements HttpInterceptor {
       return next.handle(request);
     }
 
+    // Ne pas modifier les URLs Alfresco - elles passent par le proxy
+    if (request.url.startsWith('/alfresco2/') || request.url.startsWith('/alfresco/')) {
+      console.log(`URL Alfresco détectée, pas d'interception: ${request.url}`);
+      return next.handle(request);
+    }
+
     // Déterminer l'URL de base
     let baseUrl = environment.apiUrl;
     let withCredentials = false;
