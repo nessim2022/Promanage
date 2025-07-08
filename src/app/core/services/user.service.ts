@@ -57,12 +57,16 @@ export class UserService {
   
   // Récupérer tous les utilisateurs
   getAllUsers(): Observable<User[]> {
-    // Utilisation de ensureValidUrl pour éviter les problèmes d'URL
-    const url = this.ensureValidUrl(`${this.apiUrl}/users`);
-    
-    return this.http.get<User[]>(url, { headers: this.getHeaders() })
+    // Utiliser une URL relative pour laisser l'intercepteur gérer le préfixe
+    return this.http.get<User[]>('/users', { headers: this.getHeaders(), withCredentials: true })
       .pipe(
-        tap(users => console.log(`Fetched ${users.length} users`)),
+        tap(users => {
+          if (!Array.isArray(users)) {
+            console.error('La réponse de /users n\'est pas un tableau:', users);
+            return;
+          }
+          console.log(`Fetched ${users.length} users`);
+        }),
         catchError(error => {
           console.error('Error fetching users:', error);
           return of([]);

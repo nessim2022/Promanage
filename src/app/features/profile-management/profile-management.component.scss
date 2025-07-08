@@ -1,0 +1,45 @@
+.action-btn {
+  border: none;
+  outline: none;
+  background: #f4f6fb;
+  color: #1976d2;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 4px;
+  font-size: 1.1rem;
+  box-shadow: 0 1px 3px rgba(25, 118, 210, 0.05);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    background: #e3eafc;
+    color: #1251a3;
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.12);
+  }
+
+  &.delete {
+    color: #e53935;
+    background: #fbe9e7;
+    &:hover {
+      background: #ffebee;
+      color: #b71c1c;
+    }
+  }
+
+  &.edit {
+    color: #1976d2;
+    background: #e3f2fd;
+    &:hover {
+      background: #bbdefb;
+      color: #0d47a1;
+    }
+  }
+
+  i {
+    font-size: 1.2rem;
+  }
+}

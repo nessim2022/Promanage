@@ -14,11 +14,12 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 import { catchError, finalize } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-project-list',
   standalone: true,
-  imports: [CommonModule, TableModule, ButtonModule, RouterLink, CardModule, DocumentListComponent, ToastModule, TooltipModule],
+  imports: [CommonModule, TableModule, ButtonModule, RouterLink, CardModule, DocumentListComponent, ToastModule, TooltipModule, FormsModule],
   providers: [MessageService],
   templateUrl: './project-list.component.html',
   styleUrls: ['./project-list.component.scss']
@@ -28,6 +29,7 @@ export class ProjectListComponent implements OnInit {
   selectedProjectId?: number;
   loading: boolean = false;
   isAdmin: boolean = false;
+  searchTerm: string = '';
 
   constructor(
     private projectService: ProjectService,
@@ -96,5 +98,15 @@ export class ProjectListComponent implements OnInit {
         }
       });
     }
+  }
+
+  get filteredProjects(): ProjectDTO[] {
+    if (!this.searchTerm) {
+      return this.projects;
+    }
+    const term = this.searchTerm.toLowerCase();
+    return this.projects.filter(project =>
+      project.name.toLowerCase().includes(term)
+    );
   }
 }

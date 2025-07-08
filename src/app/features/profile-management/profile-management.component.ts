@@ -28,4 +28,14 @@ export class ProfileManagementComponent implements OnInit {
       }
     });
   }
+
+  onEditUser(user: User): void {
+    // TODO: ouvrir un formulaire/modal d'édition pour cet utilisateur
+    console.log('Édition utilisateur:', user);
+  }
+
+  onDeleteUser(user: User): void {
+    // TODO: afficher une confirmation puis supprimer l'utilisateur
+    console.log('Suppression utilisateur:', user);
+  }
 }

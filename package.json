@@ -24,6 +24,7 @@
     "@primeng/themes": "^19.0.10",
     "chart.js": "^4.4.0",
     "jwt-decode": "^4.0.0",
+    "ngx-gantt": "^0.3.5",
     "primeicons": "^6.0.1",
     "primeng": "^19.0.10",
     "rxjs": "~7.8.0",

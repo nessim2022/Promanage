@@ -121,6 +121,8 @@ export class LoginComponent {
               this.errorMessage = 'Impossible de se connecter au serveur. Veuillez vérifier votre connexion internet.';
             } else if (error.status === 401) {
               this.errorMessage = 'Email ou mot de passe incorrect.';
+            } else if (error.status === 403) {
+              this.errorMessage = 'Email ou mot de passe incorrect.';
             } else if (error.status === 500) {
               this.errorMessage = 'Erreur interne du serveur. Veuillez réessayer plus tard.';
             } else {

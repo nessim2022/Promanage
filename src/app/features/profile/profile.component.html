@@ -36,7 +36,7 @@
       <p><strong>Nom :</strong> {{ user.lastName }}</p>
       <p><strong>Prénom :</strong> {{ user.firstName }}</p>
       <p><strong>Email :</strong> {{ user.email }}</p>
-      <p><strong>Rôles :</strong> <span *ngFor="let role of user?.roles; let last = last">{{ role.roleName }}<span *ngIf="!last">, </span></span></p>
+      <p><strong>Rôles :</strong> <span *ngFor="let role of user?.roles; let last = last">{{ role }}<span *ngIf="!last">, </span></span></p>
       <p-button 
         *ngIf="isSuperAdmin" 
         label="Modifier" 

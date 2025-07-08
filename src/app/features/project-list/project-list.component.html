@@ -5,6 +5,7 @@
     {{ isAdmin ? 'Tous les projets' : 'Mes projets' }} 
     <span class="badge">{{ projects.length }}</span>
   </h2>
+  <input type="text" placeholder="Rechercher..." class="search-input" [(ngModel)]="searchTerm" style="margin-left:2rem;min-width:250px;" />
   <div class="header-actions" *ngIf="isAdmin">
     <button pButton pRipple type="button" label="Nouveau projet" icon="pi pi-plus" 
             class="p-button-success" [routerLink]="['/projects/new']"></button>
@@ -19,7 +20,7 @@
     <div class="loading-spinner"></div>
     <span>Chargement des projets...</span>
   </div>
-  <p-table [value]="projects" [tableStyle]="{ 'min-width': '50rem' }" [rowHover]="true" [loading]="loading">
+  <p-table [value]="filteredProjects" [tableStyle]="{ 'min-width': '50rem' }" [rowHover]="true" [loading]="loading">
     <ng-template pTemplate="header">
       <tr>
         <th>Nom</th>

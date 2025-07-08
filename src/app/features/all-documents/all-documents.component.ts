@@ -60,10 +60,17 @@ import { FileUploadModule } from 'primeng/fileupload';
             </div>
           </div>
         </div>
+        <!-- BARRE DE RECHERCHE PROFESSIONNELLE -->
+        <div class="search-bar-container">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" [(ngModel)]="searchTerm" (input)="onSearchChange()" placeholder="Rechercher un document..." class="search-bar" />
+          </span>
+        </div>
       </div>
 
       <p-accordion [multiple]="true">
-        <p-accordionTab *ngFor="let project of projectsWithDocuments" 
+        <p-accordionTab *ngFor="let project of filteredProjectsWithDocuments" 
                        [header]="project.name + ' (' + project.documents.length + ' documents)'">
           <div class="project-actions">
             <button pButton pRipple type="button" 
@@ -115,7 +122,7 @@ import { FileUploadModule } from 'primeng/fileupload';
         </p-accordionTab>
       </p-accordion>
 
-      <div *ngIf="projectsWithDocuments.length === 0 && !loading" class="no-documents">
+      <div *ngIf="filteredProjectsWithDocuments.length === 0 && !loading" class="no-documents">
         <p>Aucun document trouvé.</p>
       </div>
 
@@ -254,6 +261,38 @@ import { FileUploadModule } from 'primeng/fileupload';
     .text-center {
       text-align: center;
     }
+    .search-bar-container {
+      margin: 1rem 0 1.5rem 0;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .search-bar {
+      border-radius: 2rem;
+      box-shadow: 0 1px 4px rgba(25, 118, 210, 0.07);
+      border: 1px solid #d1e3fa;
+      padding: 0.5rem 1.5rem 0.5rem 2.5rem;
+      font-size: 1rem;
+      min-width: 320px;
+      transition: box-shadow 0.2s, border 0.2s;
+    }
+    .search-bar:focus {
+      outline: none;
+      border-color: #1976d2;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+    }
+    .p-input-icon-left > i {
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      position: absolute;
+      color: #1976d2;
+      font-size: 1.2rem;
+    }
+    .p-input-icon-left {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
   `]
 })
 export class AllDocumentsComponent implements OnInit {
@@ -267,6 +306,9 @@ export class AllDocumentsComponent implements OnInit {
   uploadedFile: File | null = null;
   selectedFileName = '';
   uploading = false;
+  
+  searchTerm: string = '';
+  filteredProjectsWithDocuments: Array<ProjectDTO & { documents: Document[] }> = [];
   
   get isSuperAdmin(): boolean {
     return this.authService.isSuperAdmin();
@@ -330,6 +372,7 @@ export class AllDocumentsComponent implements OnInit {
         // Filtrer pour ne garder que les projets avec des documents
         this.projectsWithDocuments = projectsWithDocs.filter(project => project.documents.length > 0);
         this.loading = false;
+        this.applySearchFilter();
       });
     });
   }
@@ -472,5 +515,26 @@ export class AllDocumentsComponent implements OnInit {
         this.loadProjectsWithDocuments();
       }
     });
+  }
+
+  onSearchChange() {
+    this.applySearchFilter();
+  }
+
+  applySearchFilter() {
+    if (!this.searchTerm.trim()) {
+      this.filteredProjectsWithDocuments = this.projectsWithDocuments;
+      return;
+    }
+    const term = this.searchTerm.trim().toLowerCase();
+    this.filteredProjectsWithDocuments = this.projectsWithDocuments
+      .map(project => ({
+        ...project,
+        documents: project.documents.filter(doc =>
+          (doc.title && doc.title.toLowerCase().includes(term)) ||
+          (doc.fileName && doc.fileName.toLowerCase().includes(term))
+        )
+      }))
+      .filter(project => project.documents.length > 0);
   }
 }

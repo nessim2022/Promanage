@@ -9,6 +9,7 @@
         <th>Prénom</th>
         <th>Email</th>
         <th>Rôles</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -25,6 +26,14 @@
           <ng-template #noRole>
             <span>Aucun rôle</span>
           </ng-template>
+        </td>
+        <td>
+          <button class="action-btn edit" (click)="onEditUser(user)">
+            <i class="pi pi-pencil"></i>
+          </button>
+          <button class="action-btn delete" (click)="onDeleteUser(user)">
+            <i class="pi pi-trash"></i>
+          </button>
         </td>
       </tr>
     </tbody>

@@ -1,7 +1,11 @@
 /* src/app/features/project-list/project-list.component.scss */
 
 .project-list-header {
-  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1.2rem;
   
   h2 {
     display: flex;
@@ -23,9 +27,14 @@
   
   .header-actions {
     display: flex;
-    justify-content: flex-end;
-    margin-bottom: 1rem;
+    align-items: center;
+    margin-left: 1.5rem;
   }
+}
+
+.project-list-header .search-input {
+  margin: 0 auto 1.2rem auto;
+  display: block;
 }
 
 .loading-container {
@@ -141,5 +150,69 @@ h3 {
   align-items: center;
   .pi {
     margin-right: 0.4rem;
+  }
+}
+
+.search-input {
+  border-radius: 24px;
+  border: 1.5px solid #bdbdbd;
+  padding: 0.6rem 1.2rem;
+  font-size: 1.05rem;
+  min-width: 250px;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  margin-bottom: 1.2rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+.search-input:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px #1976d233;
+}
+
+.p-table {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 18px 0 rgba(25, 118, 210, 0.08);
+  background: #fff !important;
+  overflow: hidden;
+}
+
+.p-table th {
+  background: #e3f2fd !important;
+  color: #1976d2;
+  font-weight: 700;
+  font-size: 1.08rem;
+  border-bottom: 2px solid #90caf9 !important;
+}
+
+.p-table td {
+  font-size: 1.04rem;
+  padding: 0.7rem 1rem;
+}
+
+.p-table .action-buttons p-button {
+  margin-right: 0.3rem;
+}
+
+.badge {
+  background: #1976d2;
+  color: #fff;
+  border-radius: 12px;
+  padding: 0.2em 0.8em;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-left: 0.7em;
+}
+
+@media (max-width: 700px) {
+  .search-input {
+    min-width: 120px;
+    font-size: 0.95rem;
+    padding: 0.5rem 0.7rem;
+  }
+  .p-table th, .p-table td {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.5rem;
   }
 }
